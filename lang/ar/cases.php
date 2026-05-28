@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'cases'           => 'القضايا',
+    'case'            => 'قضية',
+    'create'          => 'إضافة قضية جديدة',
+    'edit'            => 'تعديل القضية',
+    'view'            => 'عرض القضية',
+    'close'           => 'إغلاق القضية',
+    'case_number'     => 'رقم القضية',
+    'title'           => 'عنوان القضية',
+    'description'     => 'وصف القضية',
+    'type'            => 'نوع القضية',
+    'court'           => 'المحكمة',
+    'judge'           => 'القاضي',
+    'status'          => 'الحالة',
+    'client'          => 'العميل',
+    'lawyers'         => 'المحامون',
+    'created_by'      => 'أُنشئت بواسطة',
+    'created_at'      => 'تاريخ الفتح',
+    'closed_at'       => 'تاريخ الإغلاق',
+    'pdf_report'      => 'تقرير PDF',
+
+    'statuses' => [
+        'new'      => 'جديدة',
+        'active'   => 'نشطة',
+        'pending'  => 'معلقة',
+        'adjourned'=> 'مؤجلة',
+        'closed'   => 'مغلقة',
+        'archived' => 'مؤرشفة',
+    ],
+    'types' => [
+        'civil'          => 'مدنية',
+        'criminal'       => 'جنائية',
+        'family'         => 'أسرة',
+        'labor'          => 'عمالية',
+        'commercial'     => 'تجارية',
+        'administrative' => 'إدارية',
+        'real_estate'   => 'عقارية',
+    ],
+    'roles' => [
+        'lead'      => 'محامي رئيسي',
+        'associate' => 'محامي مساعد',
+        'trainee'   => 'متدرب',
+    ],
+];

@@ -1,0 +1,46 @@
+<?php
+
+return [
+    'cases'           => 'Cases',
+    'case'            => 'Case',
+    'create'          => 'Create New Case',
+    'edit'            => 'Edit Case',
+    'view'            => 'View Case',
+    'close'           => 'Close Case',
+    'case_number'     => 'Case Number',
+    'title'           => 'Case Title',
+    'description'     => 'Description',
+    'type'            => 'Case Type',
+    'court'           => 'Court',
+    'judge'           => 'Judge',
+    'status'          => 'Status',
+    'client'          => 'Client',
+    'lawyers'         => 'Lawyers',
+    'created_by'      => 'Created By',
+    'created_at'      => 'Opened At',
+    'closed_at'       => 'Closed At',
+    'pdf_report'      => 'PDF Report',
+
+    'statuses' => [
+        'new'      => 'New',
+        'active'   => 'Active',
+        'pending'  => 'Pending',
+        'adjourned'=> 'Adjourned',
+        'closed'   => 'Closed',
+        'archived' => 'Archived',
+    ],
+    'types' => [
+        'civil'          => 'Civil',
+        'criminal'       => 'Criminal',
+        'family'         => 'Family',
+        'labor'          => 'Labor',
+        'commercial'     => 'Commercial',
+        'administrative' => 'Administrative',
+        'real_estate'   => 'Real Estate',
+    ],
+    'roles' => [
+        'lead'      => 'Lead Attorney',
+        'associate' => 'Associate',
+        'trainee'   => 'Trainee',
+    ],
+];

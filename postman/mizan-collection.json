@@ -1,0 +1,695 @@
+{
+  "info": {
+    "_postman_id": "amer-api-collection-v1",
+    "name": "Amer API — v1",
+    "description": "مجموعة كاملة لـ API نظام عامر لإدارة مكتب المحاماة.\n\n**كيفية الاستخدام:**\n1. استورد ملف `amer-environment.json` كـ Environment\n2. شغّل `POST Login` أولاً — سيُحفظ الـ token تلقائياً\n3. جميع الطلبات الأخرى ستستخدم الـ token المحفوظ\n\n**المستخدمون التجريبيون:**\n- admin@amer.test / password (office_admin)\n- lawyer1@amer.test / password (lawyer)\n- client@amer.test / password (client)",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [],
+  "auth": {
+    "type": "bearer",
+    "bearer": [
+      {
+        "key": "token",
+        "value": "{{token}}",
+        "type": "string"
+      }
+    ]
+  },
+  "item": [
+    {
+      "name": "🔐 Auth",
+      "description": "تسجيل الدخول والخروج وإدارة 2FA",
+      "item": [
+        {
+          "name": "Login",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.environment.set('token', res.data.token);",
+                  "    console.log('✅ Token saved:', res.data.token.substring(0, 20) + '...');",
+                  "} else if (res.data && res.data.requires_2fa) {",
+                  "    console.log('⚠️ 2FA required — أضف two_factor_code وأعد الإرسال');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@mizan.test\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "login"]
+            },
+            "description": "**تسجيل الدخول**\n\nيُرجع `token` يُحفظ تلقائياً في الـ environment.\n\n**الحالات المحتملة:**\n- `success: true` → token موجود → يُحفظ تلقائياً\n- `data.requires_2fa: true` → أضف `two_factor_code` في الـ body\n- `success: false` → بيانات خاطئة أو حساب معطّل\n\n**المستخدمون:**\n```\nadmin@mizan.test     / password  (office_admin)\nlawyer1@mizan.test   / password  (lawyer)\nassistant@mizan.test / password  (assistant)\nclient@mizan.test    / password  (client)\n```"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تم تسجيل الدخول بنجاح\",\n    \"data\": {\n        \"token\": \"1|abc123xyz...\",\n        \"user\": {\n            \"id\": 2,\n            \"name\": \"مدير المكتب\",\n            \"email\": \"admin@mizan.test\",\n            \"phone\": \"+201001234567\",\n            \"avatar\": null,\n            \"language\": \"ar\",\n            \"theme\": \"light\",\n            \"office_id\": 1,\n            \"roles\": [\"office_admin\"]\n        }\n    },\n    \"errors\": []\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            },
+            {
+              "name": "200 — يطلب 2FA",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": false,\n    \"message\": \"مطلوب رمز التحقق الثنائي\",\n    \"data\": { \"requires_2fa\": true },\n    \"errors\": []\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            },
+            {
+              "name": "401 — بيانات خاطئة",
+              "status": "Unauthorized",
+              "code": 401,
+              "body": "{\n    \"success\": false,\n    \"message\": \"بيانات الاعتماد غير متطابقة مع سجلاتنا.\",\n    \"data\": null,\n    \"errors\": { \"credentials\": [\"بيانات الاعتماد غير متطابقة مع سجلاتنا.\"] }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "Login with 2FA",
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"admin@mizan.test\",\n    \"password\": \"password\",\n    \"two_factor_code\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "login"]
+            },
+            "description": "نفس Login لكن مع إضافة `two_factor_code` للحسابات المفعّل عليها 2FA."
+          },
+          "response": []
+        },
+        {
+          "name": "Me (بياناتي)",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/me",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "me"]
+            },
+            "description": "**بيانات المستخدم الحالي**\n\nيُرجع بيانات المستخدم المسجّل مع roles.\n\n**يحتاج:** `Authorization: Bearer {{token}}`"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"OK\",\n    \"data\": {\n        \"id\": 2,\n        \"name\": \"مدير المكتب\",\n        \"email\": \"admin@mizan.test\",\n        \"phone\": \"+201001234567\",\n        \"avatar\": null,\n        \"language\": \"ar\",\n        \"theme\": \"light\",\n        \"office_id\": 1,\n        \"roles\": [\"office_admin\"]\n    },\n    \"errors\": []\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "Logout",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "pm.environment.set('token', '');",
+                  "console.log('✅ Token cleared');"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/logout",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "logout"]
+            },
+            "description": "**تسجيل الخروج**\n\nيحذف الـ token الحالي من قاعدة البيانات ويمسحه من الـ environment تلقائياً."
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تم تسجيل الخروج بنجاح\",\n    \"data\": null,\n    \"errors\": []\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "2FA — تفعيل",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/2fa/enable",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "2fa", "enable"]
+            },
+            "description": "**تفعيل المصادقة الثنائية**\n\nيُرجع `qr_code_url` لمسحه بتطبيق Google Authenticator و`secret` للإدخال اليدوي.\n\nبعده: استخدم `2FA — تأكيد` لتأكيد التفعيل."
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تم توليد رمز التحقق الثنائي\",\n    \"data\": {\n        \"qr_code_url\": \"otpauth://totp/Mizan:admin@mizan.test?secret=JBSWY3DPEHPK3PXP&issuer=Mizan\",\n        \"secret\": \"JBSWY3DPEHPK3PXP\"\n    },\n    \"errors\": []\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "2FA — تأكيد",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"code\": \"123456\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/2fa/verify",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "2fa", "verify"]
+            },
+            "description": "**تأكيد تفعيل 2FA**\n\nيُرسل الرمز من Google Authenticator لتأكيد التفعيل.\n\n**Body:**\n- `code` (required): الرمز المكوّن من 6 أرقام"
+          },
+          "response": []
+        },
+        {
+          "name": "2FA — تعطيل",
+          "request": {
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/2fa/disable",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "2fa", "disable"]
+            },
+            "description": "**تعطيل المصادقة الثنائية**\n\nيحذف الـ secret ويلغي تفعيل 2FA للحساب."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "📊 Dashboard",
+      "description": "إحصائيات لوحة التحكم — للمحامي والأدمن فقط",
+      "item": [
+        {
+          "name": "إحصائيات سريعة",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/dashboard/stats",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "dashboard", "stats"]
+            },
+            "description": "**إحصائيات لوحة التحكم**\n\nيُرجع ملخصاً سريعاً مع:\n- إحصائيات القضايا (إجمالي / نشطة / جديدة / مغلقة)\n- جلسات اليوم والقادمة\n- إجمالي العملاء\n- الفواتير غير المسددة\n\n**Cache:** 5 دقائق لكل office"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": {\n        \"cases\": {\n            \"total\": 10,\n            \"active\": 5,\n            \"new\": 2,\n            \"closed\": 3,\n            \"pending\": 1\n        },\n        \"hearings\": {\n            \"upcoming\": 4,\n            \"today\": 1\n        },\n        \"clients\": {\n            \"total\": 7,\n            \"active\": 6\n        },\n        \"invoices\": {\n            \"unpaid\": 3,\n            \"overdue\": 1\n        }\n    },\n    \"meta\": {}\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "⚖️ القضايا (محامي)",
+      "description": "إدارة القضايا — للمحامي والأدمن",
+      "item": [
+        {
+          "name": "قائمة القضايا",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cases",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cases"],
+              "query": [
+                { "key": "status", "value": "active", "disabled": true, "description": "new | active | pending | closed | archived" },
+                { "key": "search", "value": "", "disabled": true, "description": "بحث برقم القضية أو العنوان" },
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**قائمة القضايا مع pagination**\n\n**Query Parameters (اختياري):**\n- `status`: `new` | `active` | `pending` | `closed` | `archived`\n- `search`: بحث في رقم القضية والعنوان\n- `page`: رقم الصفحة (الافتراضي: 1، 15 عنصر/صفحة)\n\n**ملاحظة:** مفلتر تلقائياً بـ office_id"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"case_number\": \"QD-2024-001\",\n            \"title\": \"قضية نزاع عقاري\",\n            \"case_type\": \"مدني\",\n            \"status\": \"active\",\n            \"status_label\": \"نشطة\",\n            \"court\": \"محكمة الأحوال الشخصية\",\n            \"judge\": \"القاضي محمد أحمد\",\n            \"filed_at\": \"2024-01-15\",\n            \"closed_at\": null,\n            \"client\": {\n                \"id\": 1,\n                \"name\": \"أحمد محمد علي\"\n            },\n            \"created_at\": \"2024-01-15T10:30:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 10,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "قائمة القضايا — فلتر بـ status",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cases?status=active",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cases"],
+              "query": [
+                { "key": "status", "value": "active" }
+              ]
+            },
+            "description": "مثال: جلب القضايا النشطة فقط"
+          },
+          "response": []
+        },
+        {
+          "name": "تفاصيل قضية",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/cases/{{case_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "cases", "{{case_id}}"]
+            },
+            "description": "**تفاصيل قضية كاملة**\n\nيُرجع:\n- بيانات القضية\n- بيانات العميل\n- قائمة المحامين المعيّنين مع دورهم\n- قائمة الجلسات مرتبة بالتاريخ\n- قائمة المستندات\n\n**Path Parameter:**\n- `case_id`: ID القضية"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": {\n        \"id\": 1,\n        \"case_number\": \"QD-2024-001\",\n        \"title\": \"قضية نزاع عقاري\",\n        \"description\": \"نزاع على ملكية أرض في منطقة القاهرة الجديدة\",\n        \"case_type\": \"مدني\",\n        \"status\": \"active\",\n        \"status_label\": \"نشطة\",\n        \"court\": \"محكمة الأحوال الشخصية\",\n        \"judge\": \"القاضي محمد أحمد\",\n        \"opponent\": \"شركة البناء والتشييد\",\n        \"filed_at\": \"2024-01-15\",\n        \"closed_at\": null,\n        \"client\": {\n            \"id\": 1,\n            \"name\": \"أحمد محمد علي\",\n            \"email\": \"ahmed@example.com\",\n            \"phone\": \"+201001234567\"\n        },\n        \"lawyers\": [\n            { \"id\": 3, \"name\": \"محامي أول\", \"role\": \"lead\" }\n        ],\n        \"hearings\": [\n            {\n                \"id\": 1,\n                \"scheduled_at\": \"2026-06-15T10:00:00.000000Z\",\n                \"status\": \"scheduled\",\n                \"status_label\": \"مجدولة\",\n                \"court\": \"قاعة 3\"\n            }\n        ],\n        \"documents\": [\n            { \"id\": 1, \"title\": \"عقد البيع\", \"document_type\": \"contract\" }\n        ],\n        \"created_at\": \"2024-01-15T10:30:00.000000Z\"\n    },\n    \"meta\": {}\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            },
+            {
+              "name": "404 — غير موجود",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n    \"message\": \"No query results for model [App\\\\Models\\\\LegalCase] 999\"\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📅 الجلسات (محامي)",
+      "description": "إدارة الجلسات — للمحامي والأدمن",
+      "item": [
+        {
+          "name": "كل الجلسات",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/hearings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "hearings"],
+              "query": [
+                { "key": "case_id", "value": "1", "disabled": true, "description": "فلتر بـ ID القضية" },
+                { "key": "status", "value": "scheduled", "disabled": true, "description": "scheduled | completed | postponed | cancelled" },
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**قائمة كل الجلسات**\n\n**Query Parameters (اختياري):**\n- `case_id`: فلتر بـ ID قضية معيّنة\n- `status`: `scheduled` | `completed` | `postponed` | `cancelled`\n- `page`: رقم الصفحة\n\nمرتبة بالتاريخ تصاعدياً"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"case_id\": 1,\n            \"hearing_type\": \"ابتدائية\",\n            \"status\": \"scheduled\",\n            \"status_label\": \"مجدولة\",\n            \"scheduled_at\": \"2026-06-15T10:00:00.000000Z\",\n            \"court\": \"محكمة الأحوال الشخصية — قاعة 3\",\n            \"judge\": \"القاضي محمد أحمد\",\n            \"room\": \"3\",\n            \"notes\": null,\n            \"outcome\": null,\n            \"legal_case\": {\n                \"id\": 1,\n                \"case_number\": \"QD-2024-001\",\n                \"title\": \"قضية نزاع عقاري\"\n            },\n            \"created_at\": \"2024-01-15T10:30:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 5,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "الجلسات القادمة فقط",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/hearings/upcoming",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "hearings", "upcoming"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**الجلسات القادمة فقط**\n\nيُرجع الجلسات بـ status = `scheduled` وتاريخ >= الآن.\nمرتبة من الأقرب للأبعد."
+          },
+          "response": []
+        }
+      ]
+    },
+    {
+      "name": "👥 العملاء (محامي)",
+      "description": "إدارة العملاء — للمحامي والأدمن",
+      "item": [
+        {
+          "name": "قائمة العملاء",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clients"],
+              "query": [
+                { "key": "search", "value": "", "disabled": true, "description": "بحث بالاسم أو الهاتف أو البريد" },
+                { "key": "is_active", "value": "true", "disabled": true, "description": "true | false" },
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**قائمة العملاء مع عدد قضاياهم**\n\n**Query Parameters (اختياري):**\n- `search`: بحث بالاسم أو الهاتف أو البريد الإلكتروني\n- `is_active`: `true` | `false`\n- `page`: رقم الصفحة"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"name\": \"أحمد محمد علي\",\n            \"email\": \"ahmed@example.com\",\n            \"phone\": \"+201001234567\",\n            \"client_type\": \"individual\",\n            \"national_id\": \"12345678901234\",\n            \"is_active\": true,\n            \"cases_count\": 3,\n            \"created_at\": \"2024-01-10T08:00:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 7,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "تفاصيل عميل",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/clients/{{client_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "clients", "{{client_id}}"]
+            },
+            "description": "**تفاصيل عميل كاملة**\n\nيُرجع:\n- كل بيانات العميل\n- قائمة آخر 20 قضية له\n\n**Path Parameter:**\n- `client_id`: ID العميل"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"أحمد محمد علي\",\n        \"email\": \"ahmed@example.com\",\n        \"phone\": \"+201001234567\",\n        \"client_type\": \"individual\",\n        \"national_id\": \"12345678901234\",\n        \"address\": \"القاهرة، مصر الجديدة\",\n        \"notes\": null,\n        \"is_active\": true,\n        \"cases\": [\n            {\n                \"id\": 1,\n                \"case_number\": \"QD-2024-001\",\n                \"title\": \"قضية نزاع عقاري\",\n                \"status\": \"active\",\n                \"status_label\": \"نشطة\"\n            }\n        ],\n        \"created_at\": \"2024-01-10T08:00:00.000000Z\"\n    },\n    \"meta\": {}\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "🧾 الفواتير (محامي)",
+      "description": "إدارة الفواتير — للمحامي والأدمن",
+      "item": [
+        {
+          "name": "قائمة الفواتير",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "invoices"],
+              "query": [
+                { "key": "status", "value": "paid", "disabled": true, "description": "draft | sent | paid | overdue | cancelled" },
+                { "key": "client_id", "value": "1", "disabled": true, "description": "فلتر بـ ID عميل" },
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**قائمة الفواتير**\n\n**Query Parameters (اختياري):**\n- `status`: `draft` | `sent` | `paid` | `overdue` | `cancelled`\n- `client_id`: فلتر بعميل محدد\n- `page`: رقم الصفحة\n\nمرتبة من الأحدث للأقدم"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"invoice_number\": \"INV-2024-001\",\n            \"status\": \"sent\",\n            \"status_label\": \"مرسلة\",\n            \"amount\": \"5000.00\",\n            \"tax_amount\": \"750.00\",\n            \"total_amount\": \"5750.00\",\n            \"due_date\": \"2026-06-30\",\n            \"notes\": null,\n            \"client\": {\n                \"id\": 1,\n                \"name\": \"أحمد محمد علي\"\n            },\n            \"legal_case\": {\n                \"id\": 1,\n                \"case_number\": \"QD-2024-001\",\n                \"title\": \"قضية نزاع عقاري\"\n            },\n            \"created_at\": \"2024-05-01T09:00:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 8,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "تفاصيل فاتورة",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/invoices/{{invoice_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "invoices", "{{invoice_id}}"]
+            },
+            "description": "**تفاصيل فاتورة واحدة**\n\nيُرجع كل بيانات الفاتورة مع بيانات العميل والقضية المرتبطة.\n\n**Path Parameter:**\n- `invoice_id`: ID الفاتورة"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": {\n        \"id\": 1,\n        \"invoice_number\": \"INV-2024-001\",\n        \"status\": \"sent\",\n        \"status_label\": \"مرسلة\",\n        \"amount\": \"5000.00\",\n        \"tax_amount\": \"750.00\",\n        \"total_amount\": \"5750.00\",\n        \"due_date\": \"2026-06-30\",\n        \"notes\": \"أتعاب القضية كاملة\",\n        \"client\": {\n            \"id\": 1,\n            \"name\": \"أحمد محمد علي\"\n        },\n        \"legal_case\": {\n            \"id\": 1,\n            \"case_number\": \"QD-2024-001\",\n            \"title\": \"قضية نزاع عقاري\"\n        },\n        \"created_at\": \"2024-05-01T09:00:00.000000Z\"\n    },\n    \"meta\": {}\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "📱 Client Portal",
+      "description": "نقاط النهاية الخاصة بالعميل — يرى بياناته فقط\n\n**ملاحظة:** سجّل الدخول بـ `client@mizan.test` لاختبار هذه النقاط",
+      "item": [
+        {
+          "name": "⚠️ سجّل دخول بـ client أولاً",
+          "event": [
+            {
+              "listen": "test",
+              "script": {
+                "exec": [
+                  "const res = pm.response.json();",
+                  "if (res.success && res.data && res.data.token) {",
+                  "    pm.environment.set('token', res.data.token);",
+                  "    console.log('✅ Client token saved');",
+                  "}"
+                ],
+                "type": "text/javascript"
+              }
+            }
+          ],
+          "request": {
+            "auth": { "type": "noauth" },
+            "method": "POST",
+            "header": [
+              { "key": "Accept", "value": "application/json" },
+              { "key": "Content-Type", "value": "application/json" }
+            ],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n    \"email\": \"client@mizan.test\",\n    \"password\": \"password\"\n}",
+              "options": { "raw": { "language": "json" } }
+            },
+            "url": {
+              "raw": "{{base_url}}/api/v1/login",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "login"]
+            },
+            "description": "تسجيل دخول بحساب العميل — يُحفظ الـ token تلقائياً لبقية طلبات Client Portal"
+          },
+          "response": []
+        },
+        {
+          "name": "الملف الشخصي",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/client/profile",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "client", "profile"]
+            },
+            "description": "**بيانات العميل الشخصية**\n\nيُرجع بيانات العميل المرتبط بالحساب المسجّل حالياً.\n\n**ملاحظة:** يُرجع 404 إذا لم يكن للمستخدم record في جدول `clients`"
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": {\n        \"id\": 1,\n        \"name\": \"أحمد محمد علي\",\n        \"email\": \"client@mizan.test\",\n        \"phone\": \"+201001234567\",\n        \"client_type\": \"individual\",\n        \"national_id\": \"12345678901234\",\n        \"address\": \"القاهرة، مصر الجديدة\",\n        \"is_active\": true\n    },\n    \"meta\": {}\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "قضاياي",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/client/cases",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "client", "cases"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**قضايا العميل المسجّل فقط**\n\nالعميل يرى قضاياه هو فقط — لا يستطيع رؤية قضايا عملاء آخرين."
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"case_number\": \"QD-2024-001\",\n            \"title\": \"قضية نزاع عقاري\",\n            \"case_type\": \"مدني\",\n            \"status\": \"active\",\n            \"status_label\": \"نشطة\",\n            \"court\": \"محكمة الأحوال الشخصية\",\n            \"filed_at\": \"2024-01-15\",\n            \"created_at\": \"2024-01-15T10:30:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 3,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "تفاصيل قضيتي",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/client/cases/{{case_id}}",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "client", "cases", "{{case_id}}"]
+            },
+            "description": "**تفاصيل قضية العميل**\n\n**أمان:** يُرجع 404 إذا حاول العميل الوصول لقضية لا تخصه.\n\nيُرجع:\n- بيانات القضية\n- قائمة الجلسات\n\n**Path Parameter:**\n- `case_id`: ID القضية (يجب أن تكون قضية العميل)"
+          },
+          "response": [
+            {
+              "name": "404 — قضية لا تخصك",
+              "status": "Not Found",
+              "code": 404,
+              "body": "{\n    \"message\": \"No query results for model [App\\\\Models\\\\LegalCase] 5\"\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "جلساتي القادمة",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/client/hearings",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "client", "hearings"],
+              "query": [
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**جلسات العميل القادمة**\n\nيُرجع الجلسات المجدولة فقط (status = `scheduled`) لقضايا العميل.\nمرتبة من الأقرب."
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 2,\n            \"case_id\": 1,\n            \"status\": \"scheduled\",\n            \"status_label\": \"مجدولة\",\n            \"scheduled_at\": \"2026-06-15T10:00:00.000000Z\",\n            \"court\": \"محكمة الأحوال الشخصية\",\n            \"legal_case\": {\n                \"id\": 1,\n                \"case_number\": \"QD-2024-001\",\n                \"title\": \"قضية نزاع عقاري\"\n            }\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 2,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        },
+        {
+          "name": "فواتيري",
+          "request": {
+            "method": "GET",
+            "header": [
+              { "key": "Accept", "value": "application/json" }
+            ],
+            "url": {
+              "raw": "{{base_url}}/api/v1/client/invoices",
+              "host": ["{{base_url}}"],
+              "path": ["api", "v1", "client", "invoices"],
+              "query": [
+                { "key": "status", "value": "sent", "disabled": true, "description": "draft | sent | paid | overdue | cancelled" },
+                { "key": "page", "value": "1", "disabled": true }
+              ]
+            },
+            "description": "**فواتير العميل فقط**\n\n**Query Parameters (اختياري):**\n- `status`: `draft` | `sent` | `paid` | `overdue` | `cancelled`\n\nالعميل يرى فواتيره فقط."
+          },
+          "response": [
+            {
+              "name": "200 — نجاح",
+              "status": "OK",
+              "code": 200,
+              "body": "{\n    \"success\": true,\n    \"message\": \"تمت العملية بنجاح.\",\n    \"data\": [\n        {\n            \"id\": 1,\n            \"invoice_number\": \"INV-2024-001\",\n            \"status\": \"sent\",\n            \"status_label\": \"مرسلة\",\n            \"amount\": \"5000.00\",\n            \"tax_amount\": \"750.00\",\n            \"total_amount\": \"5750.00\",\n            \"due_date\": \"2026-06-30\",\n            \"notes\": null,\n            \"legal_case\": {\n                \"id\": 1,\n                \"case_number\": \"QD-2024-001\",\n                \"title\": \"قضية نزاع عقاري\"\n            },\n            \"created_at\": \"2024-05-01T09:00:00.000000Z\"\n        }\n    ],\n    \"meta\": {\n        \"pagination\": {\n            \"total\": 2,\n            \"per_page\": 15,\n            \"current_page\": 1,\n            \"last_page\": 1\n        }\n    }\n}",
+              "header": [{ "key": "Content-Type", "value": "application/json" }]
+            }
+          ]
+        }
+      ]
+    }
+  ]
+}

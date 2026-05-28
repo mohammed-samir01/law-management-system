@@ -1,0 +1,28 @@
+<?php
+
+return [
+    'login'           => 'تسجيل الدخول',
+    'logout'          => 'تسجيل الخروج',
+    'email'           => 'البريد الإلكتروني',
+    'password'        => 'كلمة المرور',
+    'remember_me'     => 'تذكرني',
+    'sign_in'         => 'دخول',
+    'client_portal'   => 'بوابة العملاء',
+    'welcome'         => 'أهلاً، :name',
+    'my_cases'        => 'قضاياي',
+    'upcoming_hearings' => 'الجلسات القادمة',
+    'no_cases'        => 'لا توجد قضايا مسجلة بعد.',
+    'no_hearings'     => 'لا توجد جلسات قادمة.',
+    'my_invoices'     => 'فواتيري',
+    'no_invoices'     => 'لا توجد فواتير بعد.',
+    'invoice_number'  => 'رقم الفاتورة',
+    'amount'          => 'المبلغ',
+    'due_date'        => 'تاريخ الاستحقاق',
+    'status'          => 'الحالة',
+    'case_number'     => 'رقم القضية',
+    'court'           => 'المحكمة',
+    'judge'           => 'القاضي',
+    'date'            => 'الموعد',
+    'invalid_credentials' => 'بيانات الدخول غير صحيحة.',
+    'account_inactive'    => 'حسابك غير مفعّل. تواصل مع المكتب.',
+];
