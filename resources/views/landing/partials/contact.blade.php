@@ -115,12 +115,17 @@ $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
                     @endif
                 </div>
 
-                <!-- Map placeholder -->
-                <div class="rounded-2xl overflow-hidden bg-navy/5 dark:bg-navy/20 h-48 flex items-center justify-center border border-navy/10 dark:border-navy/30">
-                    <div class="text-center text-gray-400">
-                        <svg class="w-10 h-10 mx-auto mb-2 opacity-40" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"/></svg>
-                        <p class="text-xs" x-text="lang==='ar'?'الخريطة التفاعلية':'Interactive Map'"></p>
-                    </div>
+                <!-- Interactive Map — OpenStreetMap (no API key required) -->
+                <div class="rounded-2xl overflow-hidden border border-navy/10 dark:border-navy/30 h-56">
+                    <iframe
+                        src="https://www.openstreetmap.org/export/embed.html?bbox=31.4721%2C30.5577%2C31.5321%2C30.6177&layer=mapnik&marker=30.5877%2C31.5021"
+                        width="100%"
+                        height="100%"
+                        style="border:0;"
+                        loading="lazy"
+                        referrerpolicy="no-referrer-when-downgrade"
+                        title="موقع مكتب عامر للمحاماة — الزقازيق"
+                    ></iframe>
                 </div>
             </div>
 
