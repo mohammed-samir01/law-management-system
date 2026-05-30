@@ -104,8 +104,8 @@ class LandingController extends Controller
                 ['icon' => 'clock',     'title_ar' => 'متاحون دائماً', 'title_en' => 'Always Available',         'desc_ar' => 'نوفر بوابة إلكترونية متكاملة تتيح لك متابعة قضيتك والتواصل مع فريقك القانوني في أي وقت وأي مكان',                      'desc_en' => 'Our integrated client portal lets you track your case and communicate with your legal team anytime, anywhere'],
             ],
             'contact' => [
-                'phone'            => '01274969862',
-                'phone2'           => '01009545140',
+                'phone'            => '+20 127 496 9862',
+                'phone2'           => '+20 100 954 5140',
                 'email'            => 'amerm5798@gmail.com',
                 'whatsapp'         => '201274969862',
                 'address_ar'       => 'مصر — الشرقية — الزقازيق',

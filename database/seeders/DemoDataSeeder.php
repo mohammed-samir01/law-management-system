@@ -37,7 +37,7 @@ class DemoDataSeeder extends Seeder
         return Office::create([
             'name'     => ['ar' => 'مكتب عامر للمحاماة', 'en' => 'Amer Law Office'],
             'slug'     => 'amer',
-            'phone'    => '01274969862',
+            'phone'    => '+20 127 496 9862',
             'email'    => 'amerm5798@gmail.com',
             'address'  => ['street' => 'الزقازيق', 'city' => 'الشرقية', 'country' => 'مصر'],
             'settings' => [
@@ -53,8 +53,8 @@ class DemoDataSeeder extends Seeder
                     'stat_satisfaction' => 98,
                 ],
                 'contact' => [
-                    'phone'            => '01274969862',
-                    'phone2'           => '01009545140',
+                    'phone'            => '+20 127 496 9862',
+                    'phone2'           => '+20 100 954 5140',
                     'email'            => 'amerm5798@gmail.com',
                     'whatsapp'         => '201274969862',
                     'address_ar'       => 'مصر — الشرقية — الزقازيق',
