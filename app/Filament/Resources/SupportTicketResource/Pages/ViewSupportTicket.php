@@ -68,6 +68,28 @@ class ViewSupportTicket extends ViewRecord
     {
         return $infolist
             ->schema([
+                // ── بيانات الزائر (من نموذج الموقع) ──────────────────────────
+                Infolists\Components\Section::make('بيانات المرسِل')
+                    ->icon('heroicon-o-user')
+                    ->schema([
+                        Infolists\Components\TextEntry::make('visitor_name')
+                            ->label('الاسم'),
+                        Infolists\Components\TextEntry::make('visitor_email')
+                            ->label('البريد الإلكتروني')
+                            ->copyable(),
+                        Infolists\Components\TextEntry::make('visitor_phone')
+                            ->label('رقم الهاتف')
+                            ->copyable()
+                            ->default('—'),
+                        Infolists\Components\TextEntry::make('description')
+                            ->label('نص الرسالة')
+                            ->columnSpanFull()
+                            ->prose(),
+                    ])
+                    ->columns(3)
+                    ->visible(fn ($record) => !empty($record->visitor_name)),
+
+                // ── تفاصيل التذكرة ────────────────────────────────────────────
                 Infolists\Components\Section::make('تفاصيل التذكرة')
                     ->schema([
                         Infolists\Components\TextEntry::make('title')
