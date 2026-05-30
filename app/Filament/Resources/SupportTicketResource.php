@@ -39,6 +39,27 @@ class SupportTicketResource extends Resource
     {
         return $form
             ->schema([
+                Forms\Components\Section::make('بيانات الزائر (من موقع الويب)')
+                    ->schema([
+                        Forms\Components\TextInput::make('visitor_name')
+                            ->label('الاسم')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('visitor_email')
+                            ->label('البريد الإلكتروني')
+                            ->disabled(),
+                        Forms\Components\TextInput::make('visitor_phone')
+                            ->label('الهاتف')
+                            ->disabled(),
+                        Forms\Components\Textarea::make('description')
+                            ->label('الرسالة')
+                            ->disabled()
+                            ->rows(4)
+                            ->columnSpanFull(),
+                    ])
+                    ->columns(3)
+                    ->visible(fn ($record) => $record && !empty($record->visitor_name))
+                    ->collapsed(false),
+
                 Forms\Components\Section::make(__('tickets.ticket'))
                     ->schema([
                         Forms\Components\TextInput::make('title')
@@ -146,6 +167,11 @@ class SupportTicketResource extends Resource
                     ->label(__('tickets.assigned_to'))
                     ->default('—')
                     ->sortable(),
+
+                Tables\Columns\TextColumn::make('visitor_name')
+                    ->label('زائر الموقع')
+                    ->default('—')
+                    ->toggleable(isToggledHiddenByDefault: false),
 
                 Tables\Columns\TextColumn::make('createdBy.name')
                     ->label(__('tickets.created_by'))

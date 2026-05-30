@@ -51,6 +51,9 @@ $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
                             <div>
                                 <div class="font-semibold text-navy dark:text-white text-sm" x-text="lang==='ar'?'الهاتف':'Phone'"></div>
                                 <a href="tel:{{ $contact['phone'] }}" class="text-gray-500 dark:text-gray-400 text-sm mt-1 block hover:text-gold transition-colors" dir="ltr">{{ $contact['phone'] }}</a>
+                                @if(!empty($contact['phone2']))
+                                <a href="tel:{{ $contact['phone2'] }}" class="text-gray-500 dark:text-gray-400 text-sm block hover:text-gold transition-colors" dir="ltr">{{ $contact['phone2'] }}</a>
+                                @endif
                             </div>
                         </div>
                         @endif

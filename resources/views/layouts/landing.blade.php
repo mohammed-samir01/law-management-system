@@ -11,7 +11,33 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <title>@yield('title', config('app.name') . ' — عامر للمحاماة')</title>
-    <meta name="description" content="@yield('description', 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية')">
+    <meta name="description" content="@yield('description', $settings['seo']['meta_description'] ?? 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية')">
+    @if(!empty($settings['seo']['meta_keywords']))
+    <meta name="keywords" content="{{ $settings['seo']['meta_keywords'] }}">
+    @endif
+    <link rel="canonical" href="{{ url()->current() }}">
+
+    <!-- Open Graph / Social Sharing -->
+    @php
+        $ogTitle = $settings['seo']['meta_title'] ?? config('app.name') . ' — عامر للمحاماة';
+        $ogDesc  = $settings['seo']['meta_description'] ?? 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية';
+        $ogImgPath = $settings['seo']['og_image_path'] ?? null;
+        $ogImage = $ogImgPath
+            ? asset('storage/' . $ogImgPath)
+            : asset('images/hero-default.webp');
+    @endphp
+    <meta property="og:type"         content="website">
+    <meta property="og:locale"       content="{{ app()->isLocale('ar') ? 'ar_EG' : 'en_US' }}">
+    <meta property="og:url"          content="{{ url()->current() }}">
+    <meta property="og:title"        content="{{ $ogTitle }}">
+    <meta property="og:description"  content="{{ $ogDesc }}">
+    <meta property="og:image"        content="{{ $ogImage }}">
+    <meta property="og:image:width"  content="1200">
+    <meta property="og:image:height" content="630">
+    <meta name="twitter:card"        content="summary_large_image">
+    <meta name="twitter:title"       content="{{ $ogTitle }}">
+    <meta name="twitter:description" content="{{ $ogDesc }}">
+    <meta name="twitter:image"       content="{{ $ogImage }}">
 
     <!-- Google Fonts -->
     <link rel="preconnect" href="https://fonts.googleapis.com">

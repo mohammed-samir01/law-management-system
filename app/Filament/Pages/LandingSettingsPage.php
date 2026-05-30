@@ -277,7 +277,9 @@ class LandingSettingsPage extends Page
                                 Forms\Components\Section::make('بيانات التواصل')
                                     ->schema([
                                         Forms\Components\TextInput::make('contact.phone')
-                                            ->label('رقم الهاتف')->tel(),
+                                            ->label('رقم الهاتف الأول')->tel(),
+                                        Forms\Components\TextInput::make('contact.phone2')
+                                            ->label('رقم الهاتف الثاني')->tel(),
                                         Forms\Components\TextInput::make('contact.email')
                                             ->label('البريد الإلكتروني')->email(),
                                         Forms\Components\TextInput::make('contact.whatsapp')
@@ -315,6 +317,39 @@ class LandingSettingsPage extends Page
                                             ->label('TikTok')->url()
                                             ->placeholder('https://tiktok.com/...'),
                                     ])->columns(2)->collapsed(),
+                            ]),
+
+                        // ── Tab 7: SEO ─────────────────────────────────────────────────
+                        Forms\Components\Tabs\Tab::make('SEO')
+                            ->icon('heroicon-o-magnifying-glass')
+                            ->schema([
+                                Forms\Components\Section::make('محركات البحث والمشاركة')
+                                    ->schema([
+                                        Forms\Components\TextInput::make('seo.meta_title')
+                                            ->label('عنوان الصفحة (Meta Title)')
+                                            ->helperText('اتركه فارغاً لاستخدام اسم المكتب تلقائياً')
+                                            ->maxLength(70)
+                                            ->columnSpanFull(),
+                                        Forms\Components\Textarea::make('seo.meta_description')
+                                            ->label('الوصف (Meta Description)')
+                                            ->helperText('150-160 حرف — يظهر في نتائج البحث')
+                                            ->rows(3)
+                                            ->maxLength(160)
+                                            ->columnSpanFull(),
+                                        Forms\Components\TextInput::make('seo.meta_keywords')
+                                            ->label('الكلمات المفتاحية')
+                                            ->helperText('مفصولة بفواصل: محامي، قانون، قضايا')
+                                            ->columnSpanFull(),
+                                        Forms\Components\FileUpload::make('seo.og_image_path')
+                                            ->label('صورة المشاركة (OG Image)')
+                                            ->helperText('تظهر عند مشاركة الرابط على واتساب وتويتر وفيسبوك — 1200×630 px مُفضَّل')
+                                            ->disk('public')
+                                            ->directory('seo')
+                                            ->maxSize(3072)
+                                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
+                                            ->deletable(true)
+                                            ->columnSpanFull(),
+                                    ])->columns(1),
                             ]),
                     ])
                     ->columnSpanFull(),

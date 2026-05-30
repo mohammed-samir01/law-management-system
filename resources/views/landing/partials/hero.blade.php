@@ -2,14 +2,20 @@
     $hero = $settings['hero'];
 
     $heroImagePath = $hero['image_path'] ?? null;
-    $heroImageUrl  = $heroImagePath
-        ? (str_starts_with($heroImagePath, 'http') ? $heroImagePath : asset('storage/' . $heroImagePath))
-        : null;
+    $heroImageUrl  = match(true) {
+        !$heroImagePath                              => null,
+        str_starts_with($heroImagePath, 'http')      => $heroImagePath,
+        str_starts_with($heroImagePath, '/')         => asset(ltrim($heroImagePath, '/')),
+        default                                      => asset('storage/' . $heroImagePath),
+    };
 
     $logoPath = $settings['branding']['logo_path'] ?? null;
-    $logoUrl  = $logoPath
-        ? (str_starts_with($logoPath, 'http') ? $logoPath : asset('storage/' . $logoPath))
-        : null;
+    $logoUrl  = match(true) {
+        !$logoPath                              => null,
+        str_starts_with($logoPath, 'http')      => $logoPath,
+        str_starts_with($logoPath, '/')         => asset(ltrim($logoPath, '/')),
+        default                                 => asset('storage/' . $logoPath),
+    };
 @endphp
 
 <section

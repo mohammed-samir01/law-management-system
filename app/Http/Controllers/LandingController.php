@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Office;
+use App\Models\SupportTicket;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
 
@@ -26,11 +27,21 @@ class LandingController extends Controller
             'message' => ['required', 'string', 'max:2000'],
         ]);
 
-        Log::info('Landing contact form submission', [
-            'name'    => $validated['name'],
-            'email'   => $validated['email'],
-            'subject' => $validated['subject'],
-        ]);
+        $office = Office::withoutGlobalScopes()->where('is_active', true)->first();
+
+        if ($office) {
+            SupportTicket::create([
+                'office_id'     => $office->id,
+                'title'         => $validated['subject'],
+                'description'   => $validated['message'],
+                'visitor_name'  => $validated['name'],
+                'visitor_email' => $validated['email'],
+                'visitor_phone' => $validated['phone'] ?? null,
+                'category'      => 'general',
+                'priority'      => 'normal',
+                'status'        => 'open',
+            ]);
+        }
 
         return response()->json([
             'success' => true,
@@ -41,13 +52,19 @@ class LandingController extends Controller
     public function getDefaultSettings(): array
     {
         return [
+            'seo' => [
+                'meta_title'       => null,
+                'meta_description' => 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية',
+                'meta_keywords'    => 'محامي، مكتب محاماة، قانون، قضايا، مصر',
+                'og_image_path'    => null,
+            ],
             'branding' => [
                 'logo_path'     => null,
                 'primary_color' => '#1E3A5F',
                 'accent_color'  => '#C9A84C',
             ],
             'hero' => [
-                'image_path'       => null,
+                'image_path'       => '/images/hero-default.webp',
                 'heading_ar'       => 'نُحقِّق العدالة بكل احترافية',
                 'heading_en'       => 'Justice Delivered with Excellence',
                 'subtitle_ar'      => 'مكتب عامر للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة',
@@ -88,13 +105,14 @@ class LandingController extends Controller
                 ['icon' => 'clock',     'title_ar' => 'متاحون دائماً', 'title_en' => 'Always Available',         'desc_ar' => 'نوفر بوابة إلكترونية متكاملة تتيح لك متابعة قضيتك والتواصل مع فريقك القانوني في أي وقت وأي مكان',                      'desc_en' => 'Our integrated client portal lets you track your case and communicate with your legal team anytime, anywhere'],
             ],
             'contact' => [
-                'phone'            => '+966 11 234 5678',
-                'email'            => 'info@amer-law.com',
-                'whatsapp'         => null,
-                'address_ar'       => 'برج الأعمال، الطابق 12، شارع الملك فهد، الرياض',
-                'address_en'       => 'Business Tower, 12th Floor, King Fahd St., Riyadh',
-                'working_hours_ar' => 'الأحد — الخميس: ٩ ص — ٦ م',
-                'working_hours_en' => 'Sunday — Thursday: 9 AM — 6 PM',
+                'phone'            => '01274969862',
+                'phone2'           => '01009545140',
+                'email'            => 'amerm5798@gmail.com',
+                'whatsapp'         => '201274969862',
+                'address_ar'       => 'القاهرة، مصر',
+                'address_en'       => 'Cairo, Egypt',
+                'working_hours_ar' => 'الأحد — الخميس: ٩ ص — ٥ م',
+                'working_hours_en' => 'Sunday — Thursday: 9 AM — 5 PM',
                 'facebook'         => null,
                 'twitter_x'        => null,
                 'instagram'        => null,
