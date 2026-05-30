@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Office;
 use App\Models\SupportTicket;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
 
 class LandingController extends Controller
 {
@@ -109,8 +108,8 @@ class LandingController extends Controller
                 'phone2'           => '01009545140',
                 'email'            => 'amerm5798@gmail.com',
                 'whatsapp'         => '201274969862',
-                'address_ar'       => 'القاهرة، مصر',
-                'address_en'       => 'Cairo, Egypt',
+                'address_ar'       => 'مصر — الشرقية — الزقازيق',
+                'address_en'       => 'Egypt — El-Sharqia — Zagazig',
                 'working_hours_ar' => 'الأحد — الخميس: ٩ ص — ٥ م',
                 'working_hours_en' => 'Sunday — Thursday: 9 AM — 5 PM',
                 'facebook'         => null,
