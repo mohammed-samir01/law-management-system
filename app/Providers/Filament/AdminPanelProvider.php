@@ -5,6 +5,7 @@ namespace App\Providers\Filament;
 use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
+use Illuminate\Support\HtmlString;
 use Filament\Http\Middleware\Authenticate;
 use Filament\Http\Middleware\DisableBladeIconComponents;
 use Filament\Http\Middleware\DispatchServingFilamentEvent;
@@ -54,6 +55,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([Authenticate::class])
             ->databaseNotifications()
-            ->databaseNotificationsPolling('30s');
+            ->databaseNotificationsPolling('30s')
+            ->renderHook('panels::head.end', fn (): HtmlString => new HtmlString(
+                '<link rel="stylesheet" href="' . asset('css/cropper.min.css') . '">'
+            ))
+            ->renderHook('panels::body.end', fn (): HtmlString => new HtmlString(
+                '<script src="' . asset('js/cropper.min.js') . '"></script>' .
+                '<script src="' . asset('js/image-editor.js') . '"></script>'
+            ));
     }
 }

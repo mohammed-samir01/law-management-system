@@ -1,11 +1,15 @@
 <?php
 
+use App\Http\Controllers\ImageEditorController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\Portal\AuthController;
 use App\Http\Controllers\Portal\DashboardController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [LandingController::class, 'index'])->name('home');
+
+// Image editor — admin only
+Route::middleware('auth')->post('/admin/image-editor/save', [ImageEditorController::class, 'save'])->name('image-editor.save');
 Route::post('/contact', [LandingController::class, 'contact'])->name('contact');
 
 Route::prefix('portal')->name('portal.')->group(function () {

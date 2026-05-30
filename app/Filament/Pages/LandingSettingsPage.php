@@ -66,6 +66,13 @@ class LandingSettingsPage extends Page
                                     ->maxSize(5120)
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->deletable(true)
+                                    ->hintActions([
+                                        Forms\Components\Actions\Action::make('edit_logo')
+                                            ->label('تعديل الصورة')
+                                            ->icon('heroicon-o-pencil-square')
+                                            ->color('warning')
+                                            ->extraAttributes(fn() => $this->editorAttrs('branding.logo_path'))
+                                    ])
                                     ->columnSpanFull(),
                                 Forms\Components\ColorPicker::make('branding.primary_color')
                                     ->label('اللون الأساسي (Navy)')
@@ -89,6 +96,13 @@ class LandingSettingsPage extends Page
                                     ->maxSize(10240)
                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                     ->deletable(true)
+                                    ->hintActions([
+                                        Forms\Components\Actions\Action::make('edit_hero')
+                                            ->label('تعديل الصورة')
+                                            ->icon('heroicon-o-pencil-square')
+                                            ->color('warning')
+                                            ->extraAttributes(fn() => $this->editorAttrs('hero.image_path'))
+                                    ])
                                     ->columnSpanFull(),
                                 Forms\Components\TextInput::make('hero.heading_ar')
                                     ->label('العنوان الرئيسي (عربي)')
@@ -155,6 +169,13 @@ class LandingSettingsPage extends Page
                                                     ->maxSize(5120)
                                                     ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                                                     ->deletable(true)
+                                                    ->hintActions([
+                                                        Forms\Components\Actions\Action::make('edit_team_photo')
+                                                            ->label('تعديل الصورة')
+                                                            ->icon('heroicon-o-pencil-square')
+                                                            ->color('warning')
+                                                            ->extraAttributes(fn() => $this->editorAttrs('team.0.photo'))
+                                                    ])
                                                     ->columnSpanFull(),
                                                 Forms\Components\TextInput::make('name_ar')->label('الاسم عربي')->required(),
                                                 Forms\Components\TextInput::make('name_en')->label('الاسم English'),
@@ -363,6 +384,25 @@ class LandingSettingsPage extends Page
             \Filament\Actions\Action::make('save')
                 ->label('حفظ الإعدادات')
                 ->submit('save'),
+        ];
+    }
+
+    /** Build extraAttributes for the image editor hint action button */
+    protected function editorAttrs(string $fieldPath): array
+    {
+        $value = data_get($this->data, $fieldPath);
+        $path  = is_array($value) ? (array_values($value)[0] ?? null) : $value;
+
+        if (! $path) {
+            return ['onclick' => 'alert(`ارفع صورة أولاً ثم احفظ ثم انقر تعديل`)'];
+        }
+
+        $url = asset('storage/' . $path);
+
+        return [
+            'data-img-url'  => $url,
+            'data-img-path' => $path,
+            'onclick'       => 'window.dispatchEvent(new CustomEvent(`open-image-editor`,{detail:{url:this.dataset.imgUrl,path:this.dataset.imgPath}}))',
         ];
     }
 }
