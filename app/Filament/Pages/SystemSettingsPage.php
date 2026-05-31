@@ -20,6 +20,17 @@ class SystemSettingsPage extends Page
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        // Platform-wide settings (app name, locale, timezone, cache) — owner only.
+        return auth()->user()?->hasRole('super_admin') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('super_admin') ?? false;
+    }
+
     public function mount(): void
     {
         $this->form->fill([
