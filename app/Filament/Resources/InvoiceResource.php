@@ -39,11 +39,15 @@ class InvoiceResource extends Resource
                         Forms\Components\Select::make('client_id')
                             ->label('العميل')
                             ->relationship('client', 'name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTranslation('name', 'ar') ?: $record->getTranslation('name', 'en'))
+                            ->preload()
                             ->searchable()
                             ->required(),
                         Forms\Components\Select::make('case_id')
                             ->label('القضية')
                             ->relationship('legalCase', 'case_number')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->case_number . ' — ' . ($record->getTranslation('title', 'ar') ?: $record->getTranslation('title', 'en')))
+                            ->preload()
                             ->searchable()
                             ->nullable(),
                         Forms\Components\Select::make('status')
@@ -77,6 +81,7 @@ class InvoiceResource extends Resource
                             ->label('المبلغ الأساسي')
                             ->numeric()
                             ->minValue(0)
+                            ->maxValue(9999999999999.99)
                             ->live(debounce: 500)
                             ->afterStateUpdated(function (Forms\Get $get, Forms\Set $set) {
                                 $amount = (float) ($get('amount') ?? 0);

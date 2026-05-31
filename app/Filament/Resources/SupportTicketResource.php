@@ -104,9 +104,10 @@ class SupportTicketResource extends Resource
                             ->label(__('tickets.assigned_to'))
                             ->options(
                                 User::whereHas('roles', fn ($q) => $q->whereIn('name', ['office_admin', 'super_admin', 'lawyer', 'assistant']))
-                                    ->pluck('name', 'id')
+                                    ->get()->pluck('name', 'id')
                             )
                             ->searchable()
+                            ->preload()
                             ->nullable(),
                     ])->columns(2),
             ]);

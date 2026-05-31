@@ -38,6 +38,8 @@ class ExpenseResource extends Resource
                         Forms\Components\Select::make('case_id')
                             ->label('القضية')
                             ->relationship('legalCase', 'case_number')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->case_number . ' — ' . ($record->getTranslation('title', 'ar') ?: $record->getTranslation('title', 'en')))
+                            ->preload()
                             ->searchable()
                             ->nullable(),
                         Forms\Components\Select::make('category')
@@ -91,6 +93,7 @@ class ExpenseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('الوصف')

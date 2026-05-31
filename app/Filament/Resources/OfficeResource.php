@@ -9,7 +9,6 @@ use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
-use Illuminate\Support\Str;
 
 class OfficeResource extends Resource
 {
@@ -38,12 +37,8 @@ class OfficeResource extends Resource
                     ->required()
                     ->unique(ignoreRecord: true)
                     ->maxLength(255)
-                    ->alphaDash(),
-                Forms\Components\FileUpload::make('logo')
-                    ->label('الشعار')
-                    ->image()
-                    ->directory('offices/logos')
-                    ->nullable(),
+                    ->alphaDash()
+                    ->helperText('يُستخدم في الرابط — أحرف إنجليزية وأرقام وشرطات فقط'),
             ])->columns(2),
 
             Forms\Components\Section::make('بيانات التواصل')->schema([
@@ -58,13 +53,18 @@ class OfficeResource extends Resource
                 Forms\Components\TextInput::make('tax_number')
                     ->label('الرقم الضريبي')
                     ->maxLength(100),
-                Forms\Components\Textarea::make('address.ar')
-                    ->label('العنوان (عربي)')
-                    ->rows(2),
-                Forms\Components\Textarea::make('address.en')
-                    ->label('العنوان (إنجليزي)')
-                    ->rows(2),
             ])->columns(2),
+
+            Forms\Components\Section::make('عنوان المكتب')->schema([
+                Forms\Components\TextInput::make('address.street')
+                    ->label('العنوان'),
+                Forms\Components\TextInput::make('address.city')
+                    ->label('المدينة'),
+                Forms\Components\TextInput::make('address.governorate')
+                    ->label('المحافظة'),
+                Forms\Components\TextInput::make('address.country')
+                    ->label('الدولة'),
+            ])->columns(4)->collapsed(),
 
             Forms\Components\Section::make('الإعدادات')->schema([
                 Forms\Components\Toggle::make('is_active')
@@ -77,17 +77,21 @@ class OfficeResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
-                Tables\Columns\TextColumn::make('name.ar')
+                Tables\Columns\TextColumn::make('name')
                     ->label('الاسم')
-                    ->searchable()
+                    ->getStateUsing(fn ($record) => $record->getTranslation('name', 'ar') ?: $record->getTranslation('name', 'en'))
+                    ->searchable(query: fn ($query, $search) => $query->where('name->ar', 'like', "%{$search}%")->orWhere('name->en', 'like', "%{$search}%"))
                     ->sortable(),
                 Tables\Columns\TextColumn::make('slug')
                     ->label('المعرف')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
                     ->label('الهاتف')
-                    ->searchable(),
+                    ->searchable()
+                    ->formatStateUsing(fn ($state) => '<span dir="ltr">' . e($state) . '</span>')
+                    ->html(),
                 Tables\Columns\TextColumn::make('email')
                     ->label('البريد')
                     ->searchable(),

@@ -16,4 +16,9 @@ class CreatePaymentGateway extends CreateRecord
         unset($data['config_fields']);
         return $data;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

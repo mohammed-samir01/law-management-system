@@ -204,7 +204,7 @@ class DocumentTemplateResource extends Resource
 
     public static function getEloquentQuery(): Builder
     {
-        return parent::getEloquentQuery()->with(['createdBy'])->latest();
+        return parent::getEloquentQuery()->latest();
     }
 
     public static function getPages(): array

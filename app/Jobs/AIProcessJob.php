@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Foundation\Queue\Queueable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Filament\Notifications\Notification;
 use Illuminate\Support\Facades\Log;
 
 class AIProcessJob implements ShouldQueue
@@ -45,5 +46,16 @@ class AIProcessJob implements ShouldQueue
             'id'     => $this->morphable->getKey(),
             'error'  => $e->getMessage(),
         ]);
+
+        if ($this->userId) {
+            $user = \App\Models\User::find($this->userId);
+            if ($user) {
+                Notification::make()
+                    ->title('فشل طلب الذكاء الاصطناعي')
+                    ->body($e->getMessage())
+                    ->danger()
+                    ->sendToDatabase($user);
+            }
+        }
     }
 }

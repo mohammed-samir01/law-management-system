@@ -26,7 +26,27 @@ class CreateAIResult extends CreateRecord
             default => throw new \InvalidArgumentException(__('ai.no_subject_selected')),
         };
 
-        AIProcessJob::dispatch($morphable, $action, $language, auth()->id());
+        if (empty(config('services.openai.api_key'))) {
+            Notification::make()
+                ->title('مفتاح OpenAI API غير مضاف')
+                ->body('يرجى إضافة OPENAI_API_KEY في ملف .env ثم تشغيل: php artisan config:clear')
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
+
+        try {
+            AIProcessJob::dispatch($morphable, $action, $language, auth()->id());
+        } catch (\Throwable $e) {
+            Notification::make()
+                ->title('فشل طلب الذكاء الاصطناعي')
+                ->body($e->getMessage())
+                ->danger()
+                ->send();
+
+            $this->halt();
+        }
 
         Notification::make()
             ->title(__('ai.request_queued'))
@@ -34,7 +54,6 @@ class CreateAIResult extends CreateRecord
             ->success()
             ->send();
 
-        // Return a placeholder so Filament doesn't crash — actual result is created by the job
         return new \App\Models\AIResult([
             'office_id'   => auth()->user()->office_id,
             'result_type' => $action,

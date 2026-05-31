@@ -16,7 +16,7 @@ class Document extends Model implements HasMedia
 
     protected $guarded = [];
 
-    public $translatable = ['title'];
+    public $translatable = ['title', 'content'];
 
     protected function casts(): array
     {

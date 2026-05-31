@@ -12,13 +12,12 @@ class OfficePolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->isSuperAdmin($user) || $this->isOfficeAdmin($user);
+        return $this->isSuperAdmin($user);
     }
 
     public function view(User $user, Office $office): bool
     {
-        if ($this->isSuperAdmin($user)) return true;
-        return $user->office_id === $office->id;
+        return $this->isSuperAdmin($user);
     }
 
     public function create(User $user): bool
@@ -28,8 +27,7 @@ class OfficePolicy
 
     public function update(User $user, Office $office): bool
     {
-        if ($this->isSuperAdmin($user)) return true;
-        return $this->isOfficeAdmin($user) && $user->office_id === $office->id;
+        return $this->isSuperAdmin($user);
     }
 
     public function delete(User $user, Office $office): bool
@@ -39,6 +37,6 @@ class OfficePolicy
 
     public function export(User $user): bool
     {
-        return $this->isSuperAdmin($user) || $this->isOfficeAdmin($user);
+        return $this->isSuperAdmin($user);
     }
 }

@@ -39,7 +39,7 @@ class DemoDataSeeder extends Seeder
             'slug'     => 'amer',
             'phone'    => '+20 127 496 9862',
             'email'    => 'amerm5798@gmail.com',
-            'address'  => ['street' => 'الزقازيق', 'city' => 'الشرقية', 'country' => 'مصر'],
+            'address'  => ['street' => 'الطيبة', 'city' => 'الزقازيق', 'governorate' => 'الشرقية', 'country' => 'مصر'],
             'settings' => [
                 'hero' => [
                     'image_path'        => '/images/hero-default.webp',

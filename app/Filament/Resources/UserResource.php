@@ -11,7 +11,6 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 class UserResource extends Resource
 {
@@ -58,12 +57,22 @@ class UserResource extends Resource
                         Office::withoutGlobalScopes()->get()->mapWithKeys(fn ($o) => [$o->id => $o->getTranslation('name', 'ar') ?: $o->getTranslation('name', 'en')])
                     )
                     ->searchable()
-                    ->nullable(),
+                    ->default(fn () => auth()->user()->office_id)
+                    ->visible(fn () => auth()->user()->hasRole('super_admin'))
+                    ->dehydrated(fn () => auth()->user()->hasRole('super_admin')),
                 Forms\Components\Select::make('roles')
                     ->label('الدور الوظيفي')
-                    ->options(Role::pluck('name', 'name'))
+                    ->relationship('roles', 'name')
+                    ->getOptionLabelFromRecordUsing(fn ($record) => match($record->name) {
+                        'super_admin'  => 'مدير المنصة',
+                        'office_admin' => 'مدير المكتب',
+                        'lawyer'       => 'محامي',
+                        'assistant'    => 'مساعد',
+                        'client'       => 'عميل',
+                        default        => $record->name,
+                    })
                     ->multiple()
-                    ->relationship('roles', 'name'),
+                    ->preload(),
                 Forms\Components\Select::make('language')
                     ->label('اللغة')
                     ->options(['ar' => 'العربية', 'en' => 'English'])
@@ -93,6 +102,7 @@ class UserResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\ImageColumn::make('avatar')
                     ->label('')

@@ -24,6 +24,14 @@ return [
         'repealed'  => 'ملغي',
     ],
 
+    'court_types' => [
+        'supreme'        => 'محكمة النقض',
+        'appeal'         => 'محكمة الاستئناف',
+        'first_instance' => 'محكمة أول درجة',
+        'administrative' => 'المحكمة الإدارية',
+        'constitutional' => 'المحكمة الدستورية',
+    ],
+
     'case_laws'        => 'أحكام قضائية',
     'case_law'         => 'حكم قضائي',
     'court_type'       => 'نوع المحكمة',

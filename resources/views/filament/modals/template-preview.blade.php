@@ -5,7 +5,7 @@
         <div class="flex flex-wrap gap-2">
             @foreach($template->placeholders as $ph)
             <span class="inline-flex items-center gap-1 text-xs bg-amber-100 dark:bg-amber-800 text-amber-800 dark:text-amber-200 px-2 py-1 rounded-full font-mono">
-                <span class="opacity-60">{{</span>{{ $ph['key'] ?? '' }}<span class="opacity-60">}}</span>
+                <span class="opacity-60">&#123;&#123;</span>{{ $ph['key'] ?? '' }}<span class="opacity-60">&#125;&#125;</span>
                 <span class="text-amber-600 dark:text-amber-400">→ {{ $ph['label'] ?? '' }}</span>
             </span>
             @endforeach

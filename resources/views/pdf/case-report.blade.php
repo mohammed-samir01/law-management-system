@@ -1,37 +1,39 @@
 <!DOCTYPE html>
-<html lang="ar">
+<html lang="ar" dir="rtl">
 <head>
 <meta charset="UTF-8">
 <style>
+@php $amiriPath = str_replace('\\', '/', public_path('fonts/Amiri-Regular.ttf')); $amiriBoldPath = str_replace('\\', '/', public_path('fonts/Amiri-Bold.ttf')); @endphp
 @if(file_exists(public_path('fonts/Amiri-Regular.ttf')))
     @font-face {
         font-family: 'Amiri';
         font-style: normal;
         font-weight: normal;
-        src: url('{{ str_replace('\\', '/', public_path('fonts/Amiri-Regular.ttf')) }}') format('truetype');
+        src: url('{{ $amiriPath }}') format('truetype');
     }
     @font-face {
         font-family: 'Amiri';
         font-style: normal;
         font-weight: bold;
-        src: url('{{ str_replace('\\', '/', public_path('fonts/Amiri-Bold.ttf')) }}') format('truetype');
+        src: url('{{ $amiriBoldPath }}') format('truetype');
     }
 @endif
 
     * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body {
+        direction: rtl;
+        text-align: right;
+    }
     body {
         font-family: {{ file_exists(public_path('fonts/Amiri-Regular.ttf')) ? "'Amiri'" : "'DejaVu Sans'" }}, sans-serif;
         font-size: 14px;
         color: #1e293b;
         background: #fff;
-        direction: rtl;
-        text-align: right;
     }
     .page { padding: 40px; }
-    .header { border-bottom: 3px solid #1E3A5F; padding-bottom: 16px; margin-bottom: 22px; overflow: hidden; }
-    .header-right { float: right; }
-    .header-left  { float: left; text-align: left; }
-    .clear        { clear: both; }
+    .header { border-bottom: 3px solid #1E3A5F; padding-bottom: 16px; margin-bottom: 22px; }
+    .header-table { width: 100%; border-collapse: collapse; }
+    .header-table td { vertical-align: middle; padding: 0; }
     .office-name  { font-size: 20px; font-weight: bold; color: #1E3A5F; }
     .report-title { font-size: 15px; font-weight: bold; color: #1E3A5F; }
     .report-sub   { font-size: 12px; color: #64748b; margin-top: 3px; }
@@ -75,14 +77,17 @@
 <div class="page">
 
     <div class="header">
-        <div class="header-right">
-            <div class="office-name">{{ $case->office?->getTranslation('name','ar') ?? config('app.name') }}</div>
-        </div>
-        <div class="header-left">
-            <div class="report-title">تقرير القضية</div>
-            <div class="report-sub">{{ $case->case_number }}</div>
-        </div>
-        <div class="clear"></div>
+        <table class="header-table">
+            <tr>
+                <td style="text-align:right; direction:rtl;">
+                    <div class="office-name">{{ $case->office?->getTranslation('name','ar') ?? config('app.name') }}</div>
+                </td>
+                <td style="text-align:left; direction:rtl; width:35%;">
+                    <div class="report-title">تقرير القضية</div>
+                    <div class="report-sub">{{ $case->case_number }}</div>
+                </td>
+            </tr>
+        </table>
     </div>
 
     <h2>معلومات القضية</h2>

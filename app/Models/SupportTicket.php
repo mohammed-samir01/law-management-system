@@ -26,10 +26,10 @@ class SupportTicket extends Model
     public function getStatusLabelAttribute(): string
     {
         return match($this->status) {
-            'open'        => 'مفتوح',
+            'open'        => 'مفتوحة',
             'in_progress' => 'قيد المعالجة',
-            'closed'      => 'مغلق',
-            'reopened'    => 'معاد فتحه',
+            'resolved'    => 'محلولة',
+            'closed'      => 'مغلقة',
             default       => $this->status,
         };
     }

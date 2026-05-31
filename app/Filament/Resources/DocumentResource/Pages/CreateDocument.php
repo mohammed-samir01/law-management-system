@@ -15,4 +15,9 @@ class CreateDocument extends CreateRecord
         $data['uploaded_by'] = auth()->id();
         return $data;
     }
+
+    protected function getRedirectUrl(): string
+    {
+        return $this->getResource()::getUrl('index');
+    }
 }

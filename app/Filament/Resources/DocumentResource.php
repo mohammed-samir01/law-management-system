@@ -5,6 +5,7 @@ namespace App\Filament\Resources;
 use App\Filament\Resources\DocumentResource\Pages;
 use App\Jobs\AIProcessJob;
 use App\Models\Document;
+use App\Models\DocumentTemplate;
 use App\Models\LegalCase;
 use App\Models\Hearing;
 use Filament\Forms;
@@ -90,18 +91,19 @@ class DocumentResource extends Resource
                             ->options(function (Forms\Get $get) {
                                 $type = $get('documentable_type');
                                 if ($type === LegalCase::class) {
-                                    return LegalCase::pluck('case_number', 'id');
+                                    return LegalCase::get()->mapWithKeys(fn ($c) => [
+                                        $c->id => $c->case_number . ' — ' . ($c->getTranslation('title', 'ar') ?: $c->getTranslation('title', 'en'))
+                                    ]);
                                 }
                                 if ($type === Hearing::class) {
                                     return Hearing::with('legalCase')
                                         ->get()
                                         ->mapWithKeys(fn ($h) => [
-                                            $h->id => ($h->legalCase?->case_number ?? '-').' — '.$h->scheduled_at?->format('Y/m/d'),
+                                            $h->id => ($h->legalCase?->case_number ?? '-') . ' — ' . $h->scheduled_at?->format('Y/m/d'),
                                         ]);
                                 }
                                 return [];
-                            })
-                            ->searchable(),
+                            }),
                     ])->columns(2),
 
                 Forms\Components\Section::make('الملف')
@@ -119,6 +121,7 @@ class DocumentResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('title')
                     ->label('العنوان')
@@ -183,8 +186,93 @@ class DocumentResource extends Resource
                     ]),
                 Tables\Filters\TrashedFilter::make(),
             ])
+            ->headerActions([
+                Tables\Actions\Action::make('from_template')
+                    ->label('إنشاء من قالب')
+                    ->icon('heroicon-o-document-duplicate')
+                    ->color('success')
+                    ->form([
+                        Forms\Components\Select::make('template_id')
+                            ->label('اختر القالب')
+                            ->options(
+                                DocumentTemplate::where('is_active', true)
+                                    ->get()
+                                    ->mapWithKeys(fn ($t) => [$t->id => $t->getTranslation('name', 'ar') ?: $t->getTranslation('name', 'en')])
+                            )
+                            ->required()
+                            ->live()
+                            ->afterStateUpdated(fn (Forms\Set $set) => $set('placeholders', [])),
+
+                        Forms\Components\Grid::make(2)
+                            ->schema(function (Forms\Get $get) {
+                                $templateId = $get('template_id');
+                                if (! $templateId) return [];
+
+                                $template = DocumentTemplate::find($templateId);
+                                if (! $template || empty($template->placeholders)) return [];
+
+                                return collect($template->placeholders)
+                                    ->map(fn ($ph) => Forms\Components\TextInput::make('placeholders.' . ($ph['key'] ?? ''))
+                                        ->label($ph['label'] ?? $ph['key'])
+                                        ->default($ph['default'] ?? '')
+                                        ->required(empty($ph['default']))
+                                    )
+                                    ->toArray();
+                            })
+                            ->visible(fn (Forms\Get $get) => (bool) $get('template_id')),
+
+                        Forms\Components\Select::make('case_id')
+                            ->label('ربط بقضية (اختياري)')
+                            ->options(
+                                LegalCase::get()->mapWithKeys(fn ($c) => [
+                                    $c->id => $c->case_number . ' — ' . ($c->getTranslation('title', 'ar') ?: $c->getTranslation('title', 'en'))
+                                ])
+                            )
+                            ->searchable()
+                            ->preload()
+                            ->nullable()
+                            ->visible(fn (Forms\Get $get) => (bool) $get('template_id')),
+                    ])
+                    ->action(function (array $data) {
+                        $template = DocumentTemplate::findOrFail($data['template_id']);
+                        $placeholders = $data['placeholders'] ?? [];
+
+                        $content = $template->content;
+                        foreach ($placeholders as $key => $value) {
+                            $content = str_replace('{{' . $key . '}}', $value, $content);
+                        }
+
+                        $titleAr = $template->getTranslation('name', 'ar') . ' — ' . now()->format('Y/m/d');
+
+                        $doc = Document::create([
+                            'office_id'         => auth()->user()->office_id,
+                            'title'             => ['ar' => $titleAr, 'en' => $template->getTranslation('name', 'en')],
+                            'type'              => $this->mapCategoryToType($template->category),
+                            'category'          => $template->category,
+                            'status'            => 'draft',
+                            'version'           => 1,
+                            'uploaded_by'       => auth()->id(),
+                            'documentable_type' => ! empty($data['case_id']) ? LegalCase::class : null,
+                            'documentable_id'   => $data['case_id'] ?? null,
+                            'content'           => ['ar' => $content, 'en' => ''],
+                        ]);
+
+                        Notification::make()
+                            ->title('تم إنشاء الوثيقة من القالب')
+                            ->body($titleAr)
+                            ->success()
+                            ->send();
+                    }),
+            ])
             ->actions([
                 Tables\Actions\EditAction::make()->label('تعديل'),
+
+                Tables\Actions\Action::make('export_pdf')
+                    ->label('تصدير PDF')
+                    ->icon('heroicon-o-arrow-down-tray')
+                    ->color('gray')
+                    ->url(fn (Document $record) => route('documents.pdf', $record))
+                    ->openUrlInNewTab(),
 
                 Tables\Actions\ActionGroup::make([
                     Tables\Actions\Action::make('ai_summarize')
@@ -239,5 +327,16 @@ class DocumentResource extends Resource
             'create' => Pages\CreateDocument::route('/create'),
             'edit'   => Pages\EditDocument::route('/{record}/edit'),
         ];
+    }
+
+    private static function mapCategoryToType(string $category): string
+    {
+        return match($category) {
+            'legal'     => 'contract',
+            'financial' => 'other',
+            'court'     => 'pleading',
+            'contract'  => 'contract',
+            default     => 'other',
+        };
     }
 }

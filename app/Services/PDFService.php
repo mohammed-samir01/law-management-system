@@ -2,6 +2,7 @@
 
 namespace App\Services;
 
+use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\LegalCase;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -15,7 +16,8 @@ class PDFService
 
         $pdf = Pdf::loadView('pdf.invoice', compact('invoice'))
             ->setPaper('a4')
-            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setOption('defaultFont', 'Amiri')
+            ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isRemoteEnabled', false);
 
         $path = "invoices/{$invoice->invoice_number}.pdf";
@@ -32,13 +34,33 @@ class PDFService
 
         $pdf = Pdf::loadView('pdf.case-report', compact('case'))
             ->setPaper('a4')
-            ->setOption('defaultFont', 'DejaVu Sans')
+            ->setOption('defaultFont', 'Amiri')
+            ->setOption('isFontSubsettingEnabled', true)
             ->setOption('isRemoteEnabled', false);
 
         $path = "cases/{$case->case_number}-report.pdf";
         Storage::disk('public')->put($path, $pdf->output());
 
         return $path;
+    }
+
+    public function downloadDocument(Document $document): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $document->loadMissing(['office', 'uploadedBy', 'documentable']);
+
+        $pdf = Pdf::loadView('pdf.document', compact('document'))
+            ->setPaper('a4')
+            ->setOption('defaultFont', 'Amiri')
+            ->setOption('isFontSubsettingEnabled', true)
+            ->setOption('isRemoteEnabled', false);
+
+        $filename = 'document-' . $document->id . '.pdf';
+
+        return response()->streamDownload(
+            fn () => print($pdf->output()),
+            $filename,
+            ['Content-Type' => 'application/pdf']
+        );
     }
 
     public function download(Invoice $invoice): \Symfony\Component\HttpFoundation\StreamedResponse

@@ -42,7 +42,9 @@ class HearingResource extends Resource
                     ->label('الحالة')
                     ->options([
                         'scheduled'  => 'مجدولة',
+                        'held'       => 'منعقدة',
                         'completed'  => 'منتهية',
+                        'adjourned'  => 'مرفوعة',
                         'postponed'  => 'مؤجلة',
                         'cancelled'  => 'ملغاة',
                     ])
@@ -94,15 +96,18 @@ class HearingResource extends Resource
                     ->label('الحالة')
                     ->formatStateUsing(fn ($state) => match($state) {
                         'scheduled'  => 'مجدولة',
+                        'held'       => 'منعقدة',
                         'completed'  => 'منتهية',
+                        'adjourned'  => 'مرفوعة',
                         'postponed'  => 'مؤجلة',
                         'cancelled'  => 'ملغاة',
                         default      => $state,
                     })
                     ->colors([
                         'info'    => 'scheduled',
-                        'success' => 'completed',
-                        'warning' => 'postponed',
+                        'primary' => 'held',
+                        'success' => ['completed', 'held'],
+                        'warning' => ['postponed', 'adjourned'],
                         'danger'  => 'cancelled',
                     ]),
                 Tables\Columns\TextColumn::make('location')

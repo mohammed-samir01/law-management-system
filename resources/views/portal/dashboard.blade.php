@@ -162,6 +162,7 @@
     </div>
     <nav>
         <span style="color:#cbd5e1">{{ __('portal.welcome', ['name' => auth()->user()->name]) }}</span>
+        <a href="{{ route('portal.invoices.index') }}" style="color:#93c5fd;text-decoration:none;font-size:.85rem;">فواتيري</a>
         <form method="POST" action="{{ route('portal.logout') }}">
             @csrf
             <button type="submit">{{ __('portal.logout') }}</button>

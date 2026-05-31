@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\AIResult;
 use App\Models\Document;
 use App\Models\LegalCase;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Facades\Log;
 use OpenAI\Client;
 
@@ -15,7 +16,7 @@ class AIService
 
     public function __construct()
     {
-        $this->client = \OpenAI::client(config('services.openai.api_key'));
+        $this->client = \OpenAI::client(config('services.openai.api_key', ''));
     }
 
     public function summarizeDocument(Document $document, string $language = 'ar'): AIResult
@@ -94,7 +95,7 @@ class AIService
         );
     }
 
-    private function run(string $prompt, string $resultType, Model|\Illuminate\Database\Eloquent\Model $morphable, int $officeId): AIResult
+    private function run(string $prompt, string $resultType, Model $morphable, int $officeId): AIResult
     {
         try {
             $response = $this->client->chat()->create([
@@ -120,12 +121,27 @@ class AIService
                 'tokens_used' => $tokensUsed,
                 'created_by'  => auth()->id(),
             ]);
-        } catch (\Exception $e) {
-            Log::error('AI request failed', [
+        } catch (\Throwable $e) {
+            Log::error('AI request failed', ['result_type' => $resultType, 'error' => $e->getMessage()]);
+
+            $friendly = match(true) {
+                str_contains($e->getMessage(), 'API key')      => 'مفتاح OpenAI API غير صحيح أو غير مفعّل.',
+                str_contains($e->getMessage(), 'quota')        => 'تم استنفاد حصة OpenAI API.',
+                str_contains($e->getMessage(), 'model')        => 'النموذج المطلوب غير متاح.',
+                str_contains($e->getMessage(), 'connect')      => 'تعذّر الاتصال بخادم OpenAI.',
+                default                                        => 'خطأ في الذكاء الاصطناعي: ' . $e->getMessage(),
+            };
+
+            return AIResult::create([
+                'office_id'   => $officeId,
+                'model_type'  => get_class($morphable),
+                'model_id'    => $morphable->getKey(),
                 'result_type' => $resultType,
-                'error'       => $e->getMessage(),
+                'content'     => '⚠️ ' . $friendly,
+                'model_used'  => $this->model,
+                'tokens_used' => 0,
+                'created_by'  => auth()->id(),
             ]);
-            throw $e;
         }
     }
 

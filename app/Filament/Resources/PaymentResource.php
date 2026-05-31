@@ -32,11 +32,15 @@ class PaymentResource extends Resource
                         Forms\Components\Select::make('client_id')
                             ->label('العميل')
                             ->relationship('client', 'name')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->getTranslation('name', 'ar') ?: $record->getTranslation('name', 'en'))
+                            ->preload()
                             ->searchable()
                             ->required(),
                         Forms\Components\Select::make('case_id')
                             ->label('القضية')
                             ->relationship('legalCase', 'case_number')
+                            ->getOptionLabelFromRecordUsing(fn ($record) => $record->case_number . ' — ' . ($record->getTranslation('title', 'ar') ?: $record->getTranslation('title', 'en')))
+                            ->preload()
                             ->searchable()
                             ->nullable(),
                         Forms\Components\TextInput::make('amount')
@@ -69,7 +73,8 @@ class PaymentResource extends Resource
                             ->required(),
                         Forms\Components\TextInput::make('gateway')
                             ->label('البوابة')
-                            ->nullable(),
+                            ->nullable()
+                            ->hidden(),
                         Forms\Components\TextInput::make('gateway_transaction_id')
                             ->label('رقم المعاملة')
                             ->nullable(),
@@ -85,6 +90,10 @@ class PaymentResource extends Resource
                                 'refunded'  => 'مُسترد',
                             ])
                             ->default('pending')
+                            ->live()
+                            ->afterStateUpdated(fn ($state, Forms\Set $set) =>
+                                $state === 'completed' ? $set('paid_at', now()->toDateTimeString()) : null
+                            )
                             ->required(),
                         Forms\Components\DateTimePicker::make('paid_at')
                             ->label('تاريخ الدفع')

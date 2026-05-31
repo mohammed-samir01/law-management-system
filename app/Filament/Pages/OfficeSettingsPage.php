@@ -58,14 +58,17 @@ class OfficeSettingsPage extends Page
                 Forms\Components\Section::make(__('settings.office_address'))
                     ->schema([
                         Forms\Components\TextInput::make('address.street')
-                            ->label(__('offices.street')),
+                            ->label('العنوان'),
 
                         Forms\Components\TextInput::make('address.city')
-                            ->label(__('offices.city')),
+                            ->label('المدينة'),
+
+                        Forms\Components\TextInput::make('address.governorate')
+                            ->label('المحافظة'),
 
                         Forms\Components\TextInput::make('address.country')
-                            ->label(__('offices.country')),
-                    ])->columns(3)->collapsed(),
+                            ->label('الدولة'),
+                    ])->columns(4)->collapsed(),
             ])
             ->statePath('data');
     }
@@ -75,13 +78,32 @@ class OfficeSettingsPage extends Page
         $data   = $this->form->getState();
         $office = Office::find(Auth::user()->office_id);
 
-        if ($office) {
-            $office->update($data);
-            Notification::make()
-                ->title(__('settings.saved'))
-                ->success()
-                ->send();
+        if (! $office) return;
+
+        // بناء نص العنوان تلقائياً من الحقول الهيكلية
+        $address = $data['address'] ?? [];
+        $parts   = array_filter([
+            $address['street']      ?? null,
+            $address['city']        ?? null,
+            $address['governorate'] ?? null,
+            $address['country']     ?? null,
+        ]);
+
+        if (! empty($parts)) {
+            $addressText = implode(' — ', $parts);
+
+            $settings = $office->settings ?? [];
+            $settings['contact']['address_ar'] = $addressText;
+            $settings['contact']['address_en'] = $addressText;
+            $data['settings'] = $settings;
         }
+
+        $office->update($data);
+
+        Notification::make()
+            ->title(__('settings.saved'))
+            ->success()
+            ->send();
     }
 
     protected function getFormActions(): array

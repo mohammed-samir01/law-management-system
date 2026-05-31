@@ -36,7 +36,9 @@ class Hearing extends Model
     {
         return match($this->status) {
             'scheduled'  => 'مجدولة',
+            'held'       => 'منعقدة',
             'completed'  => 'منتهية',
+            'adjourned'  => 'مرفوعة',
             'postponed'  => 'مؤجلة',
             'cancelled'  => 'ملغاة',
             default      => $this->status,

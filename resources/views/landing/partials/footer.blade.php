@@ -28,8 +28,14 @@ $activeSocials = array_filter($socialLinks, fn($s) => !empty($s['url']));
                     @if($logoUrl)
                         <img src="{{ $logoUrl }}" alt="logo" class="h-9 w-auto object-contain">
                     @else
-                        <div class="w-9 h-9 rounded-full bg-gold flex items-center justify-center">
-                            <span class="text-navy font-bold text-lg" style="font-family:'Tajawal',sans-serif;">ع</span>
+                        <div class="w-10 h-10 rounded-full bg-gold flex items-center justify-center shadow-md">
+                            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="#1E3A5F" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" class="w-6 h-6">
+                                <line x1="12" y1="3" x2="12" y2="21"/>
+                                <path d="M5 21h14"/>
+                                <path d="M5 8l-3 5h6L5 8z"/>
+                                <path d="M19 8l-3 5h6l-3-5z"/>
+                                <line x1="5" y1="8" x2="19" y2="8"/>
+                            </svg>
                         </div>
                     @endif
                     <span class="font-bold text-xl text-white" x-text="lang==='ar'?'عامر':'Amer'"></span>

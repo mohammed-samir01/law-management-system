@@ -106,13 +106,13 @@ class LegalCaseResource extends Resource
                 Forms\Components\Select::make('lawyers')
                     ->label('المحامون')
                     ->multiple()
-                    ->options(
-                        User::whereHas('roles', fn ($q) => $q->whereIn('name', ['lawyer', 'office_admin']))
-                            ->get()
-                            ->mapWithKeys(fn ($u) => [$u->id => $u->name])
+                    ->relationship(
+                        'lawyers',
+                        'name',
+                        fn ($query) => $query->whereHas('roles', fn ($q) => $q->whereIn('name', ['lawyer', 'office_admin']))
                     )
-                    ->relationship('lawyers', 'name')
-                    ->searchable(),
+                    ->searchable()
+                    ->preload(),
             ]),
 
             Forms\Components\Section::make('وصف القضية')->schema([
@@ -129,6 +129,7 @@ class LegalCaseResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->defaultSort('created_at', 'desc')
             ->columns([
                 Tables\Columns\TextColumn::make('case_number')
                     ->label('رقم القضية')

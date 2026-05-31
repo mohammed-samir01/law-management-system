@@ -191,7 +191,7 @@ class EnforcementFileResource extends Resource
     {
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([SoftDeletingScope::class])
-            ->with(['client', 'legalCase', 'createdBy'])
+            ->with(['createdBy'])
             ->withCount('stages');
     }
 
