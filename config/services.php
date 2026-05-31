@@ -51,4 +51,23 @@ return [
         'credentials'          => env('FIREBASE_CREDENTIALS', storage_path('app/firebase-credentials.json')),
     ],
 
+    /*
+    | Mizan platform-level billing gateway (charges OFFICES for their subscriptions).
+    | This is separate from the per-office payment_gateways (which charge each
+    | office's own clients). Keys belong to the Mizan platform itself.
+    */
+    'platform_billing' => [
+        'gateway' => env('PLATFORM_BILLING_GATEWAY', 'paymob'), // paymob | stripe
+        'paymob' => [
+            'api_key'        => env('PLATFORM_PAYMOB_API_KEY'),
+            'integration_id' => env('PLATFORM_PAYMOB_INTEGRATION_ID'),
+            'iframe_id'      => env('PLATFORM_PAYMOB_IFRAME_ID'),
+            'hmac_secret'    => env('PLATFORM_PAYMOB_HMAC_SECRET'),
+        ],
+        'stripe' => [
+            'secret_key'     => env('PLATFORM_STRIPE_SECRET_KEY'),
+            'webhook_secret' => env('PLATFORM_STRIPE_WEBHOOK_SECRET'),
+        ],
+    ],
+
 ];

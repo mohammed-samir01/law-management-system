@@ -12,21 +12,40 @@ class LandingController extends Controller
     {
         $office   = Office::withoutGlobalScopes()->where('is_active', true)->first();
         $settings = array_replace_recursive($this->getDefaultSettings(), $office?->settings ?? []);
+        $officeSlug = $office?->slug;
 
-        return view('landing.index', compact('settings'));
+        return view('landing.index', compact('settings', 'officeSlug'));
+    }
+
+    public function office(string $slug)
+    {
+        $office = Office::withoutGlobalScopes()
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->firstOrFail();
+
+        $settings   = array_replace_recursive($this->getDefaultSettings(), $office->settings ?? []);
+        $officeSlug = $office->slug;
+
+        return view('landing.index', compact('settings', 'officeSlug'));
     }
 
     public function contact(Request $request)
     {
         $validated = $request->validate([
-            'name'    => ['required', 'string', 'max:100'],
-            'email'   => ['required', 'email', 'max:150'],
-            'phone'   => ['nullable', 'string', 'max:20'],
-            'subject' => ['required', 'string', 'max:200'],
-            'message' => ['required', 'string', 'max:2000'],
+            'name'        => ['required', 'string', 'max:100'],
+            'email'       => ['required', 'email', 'max:150'],
+            'phone'       => ['nullable', 'string', 'max:20'],
+            'subject'     => ['required', 'string', 'max:200'],
+            'message'     => ['required', 'string', 'max:2000'],
+            'office_slug' => ['nullable', 'string', 'max:255'],
         ]);
 
-        $office = Office::withoutGlobalScopes()->where('is_active', true)->first();
+        // Route the message to the specific office's tickets when known,
+        // otherwise fall back to the first active office.
+        $office = ! empty($validated['office_slug'])
+            ? Office::withoutGlobalScopes()->where('slug', $validated['office_slug'])->first()
+            : Office::withoutGlobalScopes()->where('is_active', true)->first();
 
         if ($office) {
             SupportTicket::create([

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Spatie\Translatable\HasTranslations;
 
@@ -97,5 +98,27 @@ class Office extends Model
     public function aiResults(): HasMany
     {
         return $this->hasMany(AIResult::class);
+    }
+
+    public function subscription(): HasOne
+    {
+        return $this->hasOne(Subscription::class)->latestOfMany();
+    }
+
+    public function subscriptionPayments(): HasMany
+    {
+        return $this->hasMany(SubscriptionPayment::class);
+    }
+
+    public function hasUsableSubscription(): bool
+    {
+        return $this->subscription?->isUsable() ?? false;
+    }
+
+    public function activePlan(): ?Plan
+    {
+        $sub = $this->subscription;
+
+        return ($sub && $sub->isUsable()) ? $sub->plan : null;
     }
 }

@@ -132,7 +132,7 @@ $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
             <!-- Contact Form -->
             <div
                 x-data="{
-                    form: { name: '', email: '', phone: '', subject: '', message: '' },
+                    form: { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' },
                     loading: false,
                     success: false,
                     error: '',
@@ -152,7 +152,7 @@ $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
                             const data = await res.json();
                             if (data.success) {
                                 this.success = true;
-                                this.form = { name: '', email: '', phone: '', subject: '', message: '' };
+                                this.form = { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' };
                             } else {
                                 this.error = data.message || (lang === 'ar' ? 'حدث خطأ، حاول مرة أخرى' : 'An error occurred, please try again');
                             }

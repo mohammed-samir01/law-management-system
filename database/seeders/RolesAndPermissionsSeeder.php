@@ -17,6 +17,7 @@ class RolesAndPermissionsSeeder extends Seeder
             'documents', 'expenses', 'payments', 'invoices',
             'payment_gateways', 'enforcement_files', 'powers_of_attorney',
             'legislation', 'case_laws', 'support_tickets', 'reports', 'settings',
+            'plans', 'subscriptions',
         ];
 
         $actions = ['view', 'create', 'edit', 'delete', 'export', 'manage'];
@@ -35,9 +36,11 @@ class RolesAndPermissionsSeeder extends Seeder
 
         $superAdmin->givePermissionTo(Permission::all());
 
+        // office_admin: كل الصلاحيات عدا إدارة المنصة (offices / plans / subscriptions)
         $officeAdmin->givePermissionTo(
             Permission::where('name', 'not like', '%offices%')
-                      ->orWhere('name', 'view_offices')
+                      ->where('name', 'not like', '%plans%')
+                      ->where('name', 'not like', '%subscriptions%')
                       ->get()
         );
 

@@ -1,11 +1,61 @@
-# خطة تحويل ميزان إلى منصة SaaS متعددة المكاتب
+# خطة تحويل ميزان إلى منصة SaaS (نسخة كاملة ومفصّلة)
 
-## الهدف
-تحويل النظام من نظام لمكتب واحد إلى منصة SaaS تستقبل اشتراكات من مكاتب محاماة متعددة، مع:
-- صفحة تسويقية للمنصة نفسها
-- صفحة تعريفية لكل مكتب على path خاص
-- نظام خطط واشتراكات
-- تدفق تسجيل ذاتي للمكاتب الجديدة
+## Context — لماذا هذا التغيير؟
+النظام الحالي يعمل كنظام multi-tenant بعزل `office_id`، لكنه مبني عملياً لمكتب واحد:
+- الصفحة الرئيسية `/` تعرض أول مكتب نشط فقط
+- لا يوجد نظام خطط/اشتراكات
+- لا يوجد تسجيل ذاتي للمكاتب
+- لا يوجد تحصيل مالي من المكاتب
+
+الهدف: تحويله لمنصة اشتراكات حيث تسجّل المكاتب ذاتياً، تأخذ تجربة مجانية، ثم تدفع أونلاين لتفعيل اشتراكها — وأنت (مالك المنصة) تدير كل شيء من لوحة `/admin` بدور `super_admin`.
+
+**قرارات المستخدم المعتمدة:**
+1. **اسم المنصة الأم: «ميزان»** — هي الشركة/المنصة التي تشترك فيها المكاتب والمحامون. كل مكتب (مثل «مكتب عامر للمحاماة») مجرد عميل مشترك داخل ميزان.
+2. **تجربة مجانية شهر كامل (30 يوم)** — تلقائية لأي مكتب/محامي جديد بمجرد التسجيل، بكل المميزات، بدون بطاقة دفع. بعد انتهاء الشهر يجب الدفع لمتابعة الاستخدام.
+3. **تحصيل الاشتراك: أونلاين بالكارت** (بوابة على مستوى المنصة)
+4. **الإدارة: نفس لوحة `/admin`** محمية بدور `super_admin`
+5. **Routing: path-based** (`mizan.com/offices/{slug}`) — بدون subdomain
+
+---
+
+## هوية المنصة «ميزان»
+- **الصفحة الرئيسية `/`** = هوية ميزان (المنصة الأم) — شعار ميزان، عبارة تسويقية، الخطط، CTA "ابدأ مجاناً". هذه ليست صفحة أي مكتب.
+- **`/offices/{slug}`** = هوية المكتب نفسه (عامر، إلخ) — اسمه وشعاره وبياناته من `settings`.
+- **اسم التطبيق:** ضبط `APP_NAME=ميزان` في `.env` + استخدام اسم/شعار «ميزان» في كل صفحات SaaS وOnboarding وBilling والإيميلات. شعار ميزان كأصل ثابت في `public/images/` (أو إعداد منفصل `platform` لاحقاً)، منفصل عن لوجو كل مكتب.
+- **التمييز البصري:** صفحات ميزان تستخدم هوية المنصة؛ صفحات المكاتب تبقى بهوية كل مكتب (Navy/Gold الحالية أو ألوان المكتب من `settings.branding`).
+
+### إدارة الصفحات التعريفية (مهم — تحكّم كامل)
+| الصفحة | من يتحكم؟ | كيف؟ |
+|--------|----------|------|
+| صفحة ميزان `/` (الشركة الأم) | **super_admin فقط** | صفحة جديدة `PlatformSettingsPage` في `/admin` — تعدّل العنوان/الوصف/المميزات/الإحصائيات/الشعار/التواصل. تُحفظ في جدول `platform_settings` (صف واحد singleton) |
+| صفحة المكتب `/offices/{slug}` | **office_admin** (كل مكتب صفحته) | **موجود بالفعل** عبر `LandingSettingsPage` التي تعدّل `offices.settings` JSON |
+
+يعني: أنت تتحكم في صفحة ميزان، وكل مكتب يتحكم في صفحته — كلٌّ من لوحته بدون تعارض.
+
+---
+
+## الخطط والأسعار (بالجنيه المصري — اعتماد: اقتصادي)
+| الخطة | الشهري | السنوي | المستخدمون | القضايا | AI | علامة مخصصة |
+|------|--------|--------|-----------|---------|----|----|
+| **تجربة مجانية** | 0 | 0 | 15 | 200 | ✅ | ❌ | (شهر كامل تلقائي، كل المميزات) |
+| **أساسي** | 199 ج.م | 1990 ج.م | 5 | 50 | ❌ | ❌ |
+| **احترافي** | 499 ج.م | 4990 ج.م | 15 | 200 | ✅ | ❌ |
+| **مؤسسي** | 999 ج.م | 9990 ج.م | غير محدود | غير محدود | ✅ | ✅ |
+العملة الافتراضية `EGP`. الأسعار **قابلة للتعديل** لاحقاً من `PlanResource` في لوحة التحكم بدون كود.
+
+---
+
+## 💰 توضيح التكاليف (نقطة مهمة)
+
+| البند | التكلفة |
+|------|---------|
+| Laravel 12, Filament 3.3, كل حزم Spatie, DomPDF, إلخ | **مجاني (MIT)** |
+| كل الكود الجديد في هذه الخطة | **مجاني** |
+| **حزم جديدة مطلوبة** | **لا شيء — صفر حزم جديدة** |
+| فتح حساب تاجر Paymob (مصر) أو Stripe | **مجاني** |
+| **رسوم البوابة لكل عملية دفع اشتراك فعلية** | **~2.75% (Paymob) / ~2.9% (Stripe)** تُخصم من كل دفعة |
+
+**الخلاصة:** صفر تكلفة برمجية وصفر حزم مدفوعة. لا نحتاج `laravel/spark` (مدفوع) ولا حتى `laravel/cashier` — لأننا نعيد استخدام كلاسات البوابات الموجودة (`StripeGateway`, `PaymobGateway`) التي تعمل بـ HTTP مباشر. المال الوحيد هو نسبة البوابة على كل دفعة تحصّلها فعلياً.
 
 ---
 
@@ -14,616 +64,363 @@
 ```
 mizan.com/                    ← صفحة تسويقية للمنصة (جديدة)
 mizan.com/pricing             ← صفحة الأسعار (جديدة)
-mizan.com/register            ← تسجيل مكتب جديد (جديدة)
+mizan.com/register            ← تسجيل مكتب جديد + اختيار خطة (جديدة)
 mizan.com/offices/{slug}      ← صفحة تعريفية لكل مكتب (جديدة)
-mizan.com/admin               ← لوحة تحكم مشتركة (موجودة - لا تتغير)
-mizan.com/portal              ← بوابة عملاء مشتركة (موجودة - لا تتغير)
+mizan.com/admin               ← لوحة تحكم المكاتب + إدارة المنصة (super_admin)
+mizan.com/admin/billing       ← صفحة دفع/تجديد الاشتراك (جديدة)
+mizan.com/portal              ← بوابة العملاء (موجودة - لا تتغير)
+mizan.com/billing/webhook     ← استقبال تأكيد الدفع من البوابة (جديدة)
 ```
+
+### اتجاه الأموال — فرق جوهري
+- **الموجود حالياً:** مكتب → يحصّل من عملائه (مفاتيح بوابة لكل مكتب في جدول `payment_gateways`)
+- **الجديد (اشتراكات):** المنصة → تحصّل من المكاتب (مفاتيح بوابة **واحدة** للمنصة في `.env`)
+
+لذلك بوابة المنصة منفصلة تماماً عن بوابات المكاتب، ومفاتيحها في `config/services.php` وليست في قاعدة البيانات.
 
 ---
 
-## المرحلة 1: Migrations + Models
+## الحزم المستخدمة (كلها موجودة بالفعل — لا تثبيت جديد)
+- `filament/filament ^3.3` — لوحة التحكم وكل الـ Resources
+- `spatie/laravel-permission ^6` — أدوار super_admin/office_admin
+- `spatie/laravel-translatable ^6` — أسماء الخطط (ar/en)
+- `Illuminate\Support\Facades\Http` — البوابات تتصل بـ Paymob/Stripe عبره
+- Tailwind 4 + Alpine.js — صفحات التسويق والتسجيل (نفس ستايل `layouts/landing.blade.php`)
+- كلاسات البوابات الموجودة: `app/Services/Payment/Gateways/PaymobGateway.php` و`StripeGateway.php` (تُعاد استخدامها كما هي)
 
-### 1.1 إنشاء migration للخطط
-**الملف:** `database/migrations/2026_06_01_000001_create_plans_table.php`
+---
 
+## الخطوة 0: إنشاء البرانش وحفظ الخطة
+```bash
+git checkout -b saas-platform
+```
+ثم تحديث `SAAS_PLAN.md` في جذر المشروع بمحتوى هذه الخطة (نسخة كاملة محفوظة داخل المشروع).
+
+---
+
+## المرحلة 1: قاعدة البيانات والـ Models
+
+### 1.1 Migrations (3 ملفات)
+
+**`database/migrations/xxxx_create_plans_table.php`**
 ```php
 Schema::create('plans', function (Blueprint $table) {
     $table->id();
-    $table->json('name');                          // {'ar': 'احترافي', 'en': 'Professional'}
-    $table->string('slug')->unique();              // basic, pro, enterprise
+    $table->json('name');                          // {'ar':'احترافي','en':'Professional'}
+    $table->string('slug')->unique();              // trial, basic, pro, enterprise
     $table->decimal('price_monthly', 10, 2)->default(0);
     $table->decimal('price_yearly', 10, 2)->default(0);
+    $table->string('currency', 3)->default('EGP');
     $table->unsignedInteger('max_users')->default(5);
     $table->unsignedInteger('max_cases')->default(50);
     $table->unsignedInteger('max_storage_mb')->default(1024);
     $table->boolean('ai_enabled')->default(false);
     $table->boolean('custom_branding')->default(false);
+    $table->json('features')->nullable();          // قائمة مميزات نصية للعرض
     $table->boolean('is_active')->default(true);
     $table->unsignedTinyInteger('sort_order')->default(0);
     $table->timestamps();
 });
 ```
 
-### 1.2 إنشاء migration للاشتراكات
-**الملف:** `database/migrations/2026_06_01_000002_create_subscriptions_table.php`
-
+**`database/migrations/xxxx_create_subscriptions_table.php`**
 ```php
 Schema::create('subscriptions', function (Blueprint $table) {
     $table->id();
     $table->foreignId('office_id')->constrained()->cascadeOnDelete();
     $table->foreignId('plan_id')->constrained()->restrictOnDelete();
-    $table->enum('status', ['trial', 'active', 'past_due', 'cancelled', 'expired'])->default('trial');
-    $table->enum('billing_cycle', ['monthly', 'yearly'])->default('monthly');
+    $table->enum('status', ['trial','active','past_due','cancelled','expired'])->default('trial');
+    $table->enum('billing_cycle', ['monthly','yearly'])->default('monthly');
     $table->timestamp('trial_ends_at')->nullable();
     $table->timestamp('current_period_start')->nullable();
     $table->timestamp('current_period_end')->nullable();
     $table->timestamp('cancelled_at')->nullable();
-    $table->string('payment_method')->nullable();
-    $table->string('payment_reference')->nullable();
     $table->timestamps();
 });
 ```
 
-### 1.3 Model: Plan
-**الملف:** `app/Models/Plan.php`
-
+**`database/migrations/xxxx_create_platform_settings_table.php`** (إعدادات صفحة ميزان — singleton)
 ```php
-<?php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Spatie\Translatable\HasTranslations;
-
-class Plan extends Model
-{
-    use HasTranslations;
-    protected $guarded = [];
-    public $translatable = ['name'];
-
-    protected function casts(): array
-    {
-        return [
-            'price_monthly'    => 'decimal:2',
-            'price_yearly'     => 'decimal:2',
-            'ai_enabled'       => 'boolean',
-            'custom_branding'  => 'boolean',
-            'is_active'        => 'boolean',
-        ];
-    }
-
-    public function subscriptions(): HasMany
-    {
-        return $this->hasMany(Subscription::class);
-    }
-}
+Schema::create('platform_settings', function (Blueprint $table) {
+    $table->id();
+    $table->json('data')->nullable();   // {hero, features, stats, contact, branding}
+    $table->timestamps();
+});
 ```
 
-### 1.4 Model: Subscription
-**الملف:** `app/Models/Subscription.php`
-
+**`database/migrations/xxxx_create_subscription_payments_table.php`** (سجل مدفوعات الاشتراك — يطابق نمط Invoice/Payment الموجود)
 ```php
-<?php
-namespace App\Models;
-
-use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
-
-class Subscription extends Model
-{
-    protected $guarded = [];
-
-    protected function casts(): array
-    {
-        return [
-            'trial_ends_at'         => 'datetime',
-            'current_period_start'  => 'datetime',
-            'current_period_end'    => 'datetime',
-            'cancelled_at'          => 'datetime',
-        ];
-    }
-
-    public function office(): BelongsTo
-    {
-        return $this->belongsTo(Office::class);
-    }
-
-    public function plan(): BelongsTo
-    {
-        return $this->belongsTo(Plan::class);
-    }
-
-    public function isActive(): bool
-    {
-        return match($this->status) {
-            'active' => $this->current_period_end?->isFuture() ?? false,
-            'trial'  => $this->trial_ends_at?->isFuture() ?? false,
-            default  => false,
-        };
-    }
-}
+Schema::create('subscription_payments', function (Blueprint $table) {
+    $table->id();
+    $table->foreignId('subscription_id')->constrained()->cascadeOnDelete();
+    $table->foreignId('office_id')->constrained()->cascadeOnDelete();
+    $table->decimal('amount', 10, 2);
+    $table->string('currency', 3)->default('EGP');
+    $table->enum('billing_cycle', ['monthly','yearly']);
+    $table->string('gateway');                     // paymob / stripe
+    $table->string('gateway_transaction_id')->nullable();
+    $table->string('reference')->nullable();       // order_id من البوابة
+    $table->enum('status', ['pending','completed','failed','refunded'])->default('pending');
+    $table->timestamp('paid_at')->nullable();
+    $table->timestamps();
+});
 ```
 
-### 1.5 تعديل Office Model
-**الملف:** `app/Models/Office.php`
-**إضافة:**
+### 1.2 Models (3 جديدة + تعديل Office)
+
+**`app/Models/Plan.php`** — `HasTranslations` على `name`، casts للأرقام والـ booleans، `features` => array، `hasMany(Subscription)`. بدون global scope (الخطط عامة على مستوى المنصة).
+
+**`app/Models/Subscription.php`** — `belongsTo(Office)`, `belongsTo(Plan)`, `hasMany(SubscriptionPayment)`. دوال مساعدة:
 ```php
-use Illuminate\Database\Eloquent\Relations\HasOne;
+public function isActive(): bool   // active + current_period_end مستقبلي
+public function onTrial(): bool     // trial + trial_ends_at مستقبلي
+public function isUsable(): bool    // isActive() || onTrial()
+public function daysLeft(): int     // أيام متبقية للتجربة أو الفترة
+```
+بدون global scope (super_admin يرى كل الاشتراكات).
 
-public function subscription(): HasOne
-{
-    return $this->hasOne(Subscription::class)->latestOfMany();
-}
+**`app/Models/SubscriptionPayment.php`** — `belongsTo(Subscription)`, `belongsTo(Office)`, casts.
 
+**`app/Models/PlatformSetting.php`** (singleton لإعدادات صفحة ميزان) — `data` => array. دالة `static current(): array` تجيب الصف الأول (أو تنشئه) وتدمجه مع `getDefaultPlatformSettings()` بنفس نمط `LandingController::getDefaultSettings()` الموجود.
+
+**تعديل `app/Models/Office.php`** — إضافة:
+```php
+public function subscription(): HasOne   // hasOne(Subscription)->latestOfMany()
+public function hasUsableSubscription(): bool  // subscription?->isUsable() ?? false
 public function activePlan(): ?Plan
-{
-    $sub = $this->subscription;
-    return ($sub && $sub->isActive()) ? $sub->plan : null;
-}
-
-public function hasActiveSubscription(): bool
-{
-    return $this->subscription?->isActive() ?? false;
-}
 ```
 
 ---
 
-## المرحلة 2: PlanSeeder
+## المرحلة 2: بوابة المنصة (إعادة استخدام الكلاسات الموجودة)
 
-**الملف:** `database/seeders/PlanSeeder.php`
-
+### 2.1 إعدادات المنصة في `config/services.php`
 ```php
-<?php
-namespace Database\Seeders;
+'platform_billing' => [
+    'gateway'        => env('PLATFORM_BILLING_GATEWAY', 'paymob'), // paymob | stripe
+    'paymob' => [
+        'api_key'        => env('PAYMOB_API_KEY'),
+        'integration_id' => env('PAYMOB_INTEGRATION_ID'),
+        'iframe_id'      => env('PAYMOB_IFRAME_ID'),
+        'hmac_secret'    => env('PAYMOB_HMAC_SECRET'),
+    ],
+    'stripe' => [
+        'secret_key'     => env('STRIPE_SECRET_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+    ],
+],
+```
+**إضافات `.env` (وثّقها في `.env.example`):**
+```
+PLATFORM_BILLING_GATEWAY=paymob
+PAYMOB_API_KEY=
+PAYMOB_INTEGRATION_ID=
+PAYMOB_IFRAME_ID=
+PAYMOB_HMAC_SECRET=
+```
 
-use App\Models\Plan;
-use Illuminate\Database\Seeder;
-
-class PlanSeeder extends Seeder
+### 2.2 `app/Services/Billing/PlatformBillingService.php` (جديد)
+خدمة خفيفة تُنشئ كلاس البوابة الموجود بمفاتيح المنصة (وليس مفاتيح مكتب):
+```php
+public static function gateway(): PaymentGatewayInterface
 {
-    public function run(): void
-    {
-        $plans = [
-            [
-                'name'           => ['ar' => 'تجريبي', 'en' => 'Trial'],
-                'slug'           => 'trial',
-                'price_monthly'  => 0,
-                'price_yearly'   => 0,
-                'max_users'      => 3,
-                'max_cases'      => 10,
-                'max_storage_mb' => 512,
-                'ai_enabled'     => false,
-                'custom_branding'=> false,
-                'sort_order'     => 0,
-            ],
-            [
-                'name'           => ['ar' => 'أساسي', 'en' => 'Basic'],
-                'slug'           => 'basic',
-                'price_monthly'  => 199,
-                'price_yearly'   => 1990,
-                'max_users'      => 5,
-                'max_cases'      => 50,
-                'max_storage_mb' => 2048,
-                'ai_enabled'     => false,
-                'custom_branding'=> false,
-                'sort_order'     => 1,
-            ],
-            [
-                'name'           => ['ar' => 'احترافي', 'en' => 'Professional'],
-                'slug'           => 'pro',
-                'price_monthly'  => 499,
-                'price_yearly'   => 4990,
-                'max_users'      => 15,
-                'max_cases'      => 200,
-                'max_storage_mb' => 10240,
-                'ai_enabled'     => true,
-                'custom_branding'=> false,
-                'sort_order'     => 2,
-            ],
-            [
-                'name'           => ['ar' => 'مؤسسي', 'en' => 'Enterprise'],
-                'slug'           => 'enterprise',
-                'price_monthly'  => 999,
-                'price_yearly'   => 9990,
-                'max_users'      => 9999,
-                'max_cases'      => 9999,
-                'max_storage_mb' => 102400,
-                'ai_enabled'     => true,
-                'custom_branding'=> true,
-                'sort_order'     => 3,
-            ],
-        ];
-
-        foreach ($plans as $plan) {
-            Plan::updateOrCreate(['slug' => $plan['slug']], $plan);
-        }
-    }
+    $name   = config('services.platform_billing.gateway');
+    $config = config("services.platform_billing.$name");
+    $class  = ['paymob' => PaymobGateway::class, 'stripe' => StripeGateway::class][$name];
+    return new $class($config);   // نفس كلاسات app/Services/Payment/Gateways
 }
-```
 
-**تسجيل في DatabaseSeeder:**
-```php
-$this->call([
-    RolesAndPermissionsSeeder::class,
-    DemoDataSeeder::class,
-    DocumentTemplateSeeder::class,
-    PlanSeeder::class,
-]);
+public static function priceFor(Plan $plan, string $cycle): float  // monthly|yearly
 ```
+**ملاحظة:** `PaymobGateway::charge()` يُرجع `data.payment_url` (redirect flow) — يطابق تماماً تدفق `Portal\InvoiceController::pay()` الموجود. نعيد استخدام نفس النمط: charge → `redirect()->away($payment_url)` → webhook/callback يؤكد.
 
 ---
 
-## المرحلة 3: الصفحة التسويقية للمنصة
+## المرحلة 3: الصفحة التسويقية + صفحة المكتب
 
-### 3.1 SaasLandingController
-**الملف:** `app/Http/Controllers/SaasLandingController.php`
+### 3.1 `app/Http/Controllers/SaasLandingController.php` (جديد)
+- `index()` → يقرأ `$platform = PlatformSetting::current()` + `$plans = Plan::active()` → `view('saas.landing', compact('platform','plans'))` (المحتوى من إعدادات المنصة القابلة للتعديل)
+- `pricing()` → `view('saas.pricing', compact('plans'))`
 
+### 3.2 تعديل `app/Http/Controllers/LandingController.php`
+إضافة `office(string $slug)` — تجيب المكتب بالـ slug وتعرض `landing.index` بنفس منطق `index()` الحالي (إعادة استخدام `getDefaultSettings()` و`array_replace_recursive`).
+
+### 3.3 تعديل `routes/web.php`
 ```php
-<?php
-namespace App\Http\Controllers;
-
-use App\Models\Plan;
-
-class SaasLandingController extends Controller
-{
-    public function index()
-    {
-        $plans = Plan::where('is_active', true)->orderBy('sort_order')->get();
-        return view('saas.landing', compact('plans'));
-    }
-
-    public function pricing()
-    {
-        $plans = Plan::where('is_active', true)->orderBy('sort_order')->get();
-        return view('saas.pricing', compact('plans'));
-    }
-}
-```
-
-### 3.2 تعديل LandingController
-**الملف:** `app/Http/Controllers/LandingController.php`
-**إضافة method جديدة:**
-
-```php
-public function office(string $slug)
-{
-    $office = Office::withoutGlobalScopes()
-        ->where('slug', $slug)
-        ->where('is_active', true)
-        ->firstOrFail();
-
-    $settings = array_replace_recursive($this->getDefaultSettings(), $office->settings ?? []);
-
-    return view('landing.index', compact('settings'));
-}
-```
-
-### 3.3 تحديث routes/web.php
-
-```php
-// القديم (احذف):
-Route::get('/', [LandingController::class, 'index'])->name('home');
-
-// الجديد (أضف):
 Route::get('/', [SaasLandingController::class, 'index'])->name('home');
 Route::get('/pricing', [SaasLandingController::class, 'pricing'])->name('pricing');
 Route::get('/offices/{slug}', [LandingController::class, 'office'])->name('office.landing');
-
-// تسجيل المكاتب (جديد):
+// تسجيل المكاتب
 Route::prefix('register')->name('register.')->group(function () {
     Route::get('/', [OnboardingController::class, 'showPlans'])->name('plans');
     Route::post('/plan', [OnboardingController::class, 'selectPlan'])->name('plan.select');
     Route::get('/setup', [OnboardingController::class, 'showSetup'])->name('setup');
-    Route::post('/setup', [OnboardingController::class, 'createOffice'])->name('create');
+    Route::post('/setup', [OnboardingController::class, 'register'])->name('store');
     Route::get('/success', [OnboardingController::class, 'success'])->name('success');
 });
 ```
+**مهم:** نقل route الـ contact ليصبح per-office `POST /offices/{slug}/contact` حتى تذهب رسالة كل صفحة لمكتبها الصحيح (حالياً تذهب لأول مكتب فقط).
 
-### 3.4 View: resources/views/saas/landing.blade.php
-
-**محتوى الصفحة (بنفس ستايل landing الحالي — Tailwind + Alpine.js):**
-- **Header:** شعار المنصة + nav (Features, Pricing, Login)
-- **Hero:** "منصة إدارة مكاتب المحاماة الأكثر احترافية" + CTA "ابدأ تجربتك المجانية"
-- **Stats:** عدد المكاتب، القضايا، العملاء
-- **Features:** (6 بطاقات) إدارة القضايا، الفواتير، الجلسات، الوثائق، الذكاء الاصطناعي، بوابة العملاء
-- **Pricing:** الخطط من `$plans`
-- **CTA Final:** "ابدأ الآن مجاناً لمدة 14 يوماً"
-- **Footer:** روابط + حقوق
-
-### 3.5 View: resources/views/saas/pricing.blade.php
-
-**4 خطط في Grid:**
-```
-تجريبي | أساسي | احترافي (موصى به) | مؤسسي
-مجاناً | 199 ج.م/شهر | 499 ج.م/شهر | 999 ج.م/شهر
-```
-كل خطة تعرض: السعر، الحدود، المميزات، زر "اشترك الآن"
+### 3.4 Views جديدة (Tailwind + Alpine، تعيد استخدام `layouts/landing.blade.php`)
+- `resources/views/saas/landing.blade.php` — Hero للمنصة + 6 بطاقات مميزات + جدول الخطط + CTA "ابدأ مجاناً"
+- `resources/views/saas/pricing.blade.php` — الخطط الـ4 في grid مع زر "اشترك"
+- شريط تنقل المنصة + footer (يمكن عمل partial مشترك `saas/partials/navbar` + `footer`)
 
 ---
 
 ## المرحلة 4: تدفق التسجيل (Onboarding)
 
-### 4.1 OnboardingController
-**الملف:** `app/Http/Controllers/OnboardingController.php`
+### 4.1 `app/Http/Controllers/OnboardingController.php` (جديد)
+خطوات:
+1. `showPlans()` — عرض الخطط
+2. `selectPlan()` — يحفظ `plan_id` + `billing_cycle` في session
+3. `showSetup()` — فورم بيانات المكتب + المسؤول (يتحقق وجود plan في session)
+4. `register()` — validation ثم `DB::transaction`:
+   - إنشاء `Office` (name ar/en, slug, phone, email, is_active=true)
+   - إنشاء `User` (office_admin) عبر `assignRole('office_admin')`
+   - إنشاء `Subscription` status=`trial`, `trial_ends_at = now()->addDays(30)` (شهر كامل بكل المميزات)
+   - `Auth::login($user)`
+   - **دائماً تبدأ بالتجربة المجانية أولاً** → `register.success`. حتى لو اختار خطة مدفوعة، يأخذ الشهر مجاناً ثم يُطالَب بالدفع عند الانتهاء (الخطة المختارة تُحفظ كتفضيل للترقية لاحقاً).
+5. `success()` — صفحة ترحيب + زر دخول `/admin`
 
-```php
-<?php
-namespace App\Http\Controllers;
-
-use App\Models\Office;
-use App\Models\Plan;
-use App\Models\Subscription;
-use App\Models\User;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
-
-class OnboardingController extends Controller
-{
-    public function showPlans()
-    {
-        $plans = Plan::where('is_active', true)->orderBy('sort_order')->get();
-        return view('onboarding.plans', compact('plans'));
-    }
-
-    public function selectPlan(Request $request)
-    {
-        $request->validate(['plan_id' => 'required|exists:plans,id']);
-        session(['onboarding_plan_id' => $request->plan_id]);
-        return redirect()->route('register.setup');
-    }
-
-    public function showSetup()
-    {
-        if (! session('onboarding_plan_id')) {
-            return redirect()->route('register.plans');
-        }
-        $plan = Plan::findOrFail(session('onboarding_plan_id'));
-        return view('onboarding.setup', compact('plan'));
-    }
-
-    public function createOffice(Request $request)
-    {
-        $validated = $request->validate([
-            'office_name_ar' => 'required|string|max:255',
-            'office_name_en' => 'nullable|string|max:255',
-            'slug'           => 'required|string|max:100|unique:offices,slug|regex:/^[a-z0-9\-]+$/',
-            'phone'          => 'required|string|max:20',
-            'email'          => 'required|email|max:255|unique:offices,email',
-            'admin_name'     => 'required|string|max:255',
-            'admin_email'    => 'required|email|max:255|unique:users,email',
-            'admin_password' => 'required|string|min:8|confirmed',
-        ]);
-
-        $planId = session('onboarding_plan_id');
-        $plan   = Plan::findOrFail($planId);
-
-        DB::transaction(function () use ($validated, $plan) {
-            $office = Office::create([
-                'name'      => ['ar' => $validated['office_name_ar'], 'en' => $validated['office_name_en'] ?? ''],
-                'slug'      => $validated['slug'],
-                'phone'     => $validated['phone'],
-                'email'     => $validated['email'],
-                'is_active' => true,
-            ]);
-
-            $user = User::create([
-                'name'      => $validated['admin_name'],
-                'email'     => $validated['admin_email'],
-                'password'  => Hash::make($validated['admin_password']),
-                'office_id' => $office->id,
-            ]);
-            $user->assignRole('office_admin');
-
-            Subscription::create([
-                'office_id'          => $office->id,
-                'plan_id'            => $plan->id,
-                'status'             => $plan->slug === 'trial' || $plan->price_monthly == 0 ? 'trial' : 'active',
-                'billing_cycle'      => 'monthly',
-                'trial_ends_at'      => now()->addDays(14),
-                'current_period_start' => now(),
-                'current_period_end'   => now()->addMonth(),
-            ]);
-        });
-
-        session()->forget('onboarding_plan_id');
-        return redirect()->route('register.success');
-    }
-
-    public function success()
-    {
-        return view('onboarding.success');
-    }
-}
-```
-
-### 4.2 Views للـ Onboarding
-
-**`resources/views/onboarding/plans.blade.php`**
-- نفس ستايل الصفحات الحالية (Navy + Gold)
-- عرض الخطط الـ 4 في grid
-- كل خطة: الاسم، السعر، المميزات، زر "اختر هذه الخطة"
-- Step indicator: 1 اختر خطتك → 2 بيانات المكتب → 3 تم
-
-**`resources/views/onboarding/setup.blade.php`**
-- Form فيه:
-  - اسم المكتب (عربي / إنجليزي)
-  - المعرف الفريد (slug) — يظهر preview: `mizan.com/offices/your-slug`
-  - الهاتف والبريد الإلكتروني
-  - اسم المسؤول / الإيميل / الباسورد
-- Step indicator: 1 ✅ → **2 بيانات المكتب** → 3 تم
-
-**`resources/views/onboarding/success.blade.php`**
-- أيقونة ✅ كبيرة
-- رسالة: "تم إنشاء مكتبك بنجاح!"
-- بيانات الدخول
-- زر: "ادخل على لوحة التحكم"
+### 4.2 Views
+- `resources/views/onboarding/plans.blade.php` (مؤشر خطوات 1/2/3)
+- `resources/views/onboarding/setup.blade.php` (preview للـ slug: `mizan.com/offices/your-slug`)
+- `resources/views/onboarding/success.blade.php`
 
 ---
 
-## المرحلة 5: Middleware الاشتراك
+## المرحلة 5: دفع/تجديد الاشتراك أونلاين
 
-### 5.1 CheckSubscription Middleware
-**الملف:** `app/Http/Middleware/CheckSubscription.php`
+### 5.1 `app/Http/Controllers/SubscriptionBillingController.php` (جديد، auth)
+- `show()` — صفحة الاشتراك الحالي (الخطة، الحالة، أيام متبقية، أزرار الترقية/الدفع)
+- `checkout(Request)` — يختار خطة + دورة، ينشئ `SubscriptionPayment(status=pending)`، يستدعي `PlatformBillingService::gateway()->charge([...callback_url => billing.callback...])`، ثم `redirect()->away($payment_url)`
+- `callback(Request)` — عند الرجوع من البوابة: يتحقق، يحدّث `SubscriptionPayment=completed` + `Subscription`(status=active, current_period_start=now, current_period_end=+شهر/سنة)
+- `webhook(Request)` — endpoint عام (بدون auth، بدون CSRF) يستقبل تأكيد Paymob/Stripe، يتحقق HMAC عبر `gateway->handleWebhook()`، ويُفعّل الاشتراك (مصدر التأكيد الموثوق)
 
+### 5.2 Routes
 ```php
-<?php
-namespace App\Http\Middleware;
-
-use Closure;
-use Illuminate\Http\Request;
-
-class CheckSubscription
-{
-    public function handle(Request $request, Closure $next)
-    {
-        $user = $request->user();
-
-        if (! $user || ! $user->office_id) {
-            return $next($request);
-        }
-
-        // super_admin مش محتاج subscription
-        if ($user->hasRole('super_admin')) {
-            return $next($request);
-        }
-
-        $office = $user->office;
-
-        if (! $office || ! $office->hasActiveSubscription()) {
-            return redirect()->route('subscription.expired');
-        }
-
-        return $next($request);
-    }
-}
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/billing', [SubscriptionBillingController::class, 'show'])->name('billing.show');
+    Route::post('/admin/billing/checkout', [SubscriptionBillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/admin/billing/callback', [SubscriptionBillingController::class, 'callback'])->name('billing.callback');
+});
+Route::post('/billing/webhook', [SubscriptionBillingController::class, 'webhook'])
+    ->withoutMiddleware([VerifyCsrfToken::class])->name('billing.webhook');
 ```
 
-### 5.2 تسجيل Middleware
-**الملف:** `bootstrap/app.php`
-```php
-->withMiddleware(function (Middleware $middleware) {
-    $middleware->alias([
-        'client.portal'       => EnsureClientRole::class,
-        'check.subscription'  => CheckSubscription::class,
-    ]);
-})
-```
-
-### 5.3 تطبيق Middleware على Admin
-**الملف:** `app/Providers/Filament/AdminPanelProvider.php`
-```php
-->authMiddleware([
-    Authenticate::class,
-    \App\Http\Middleware\CheckSubscription::class,
-])
-```
-
-### 5.4 Route لانتهاء الاشتراك
-**الملف:** `routes/web.php`
-```php
-Route::middleware('auth')->get('/subscription/expired', function () {
-    return view('subscription.expired');
-})->name('subscription.expired');
-```
-
-**الملف:** `resources/views/subscription/expired.blade.php`
-- رسالة: "انتهى اشتراكك"
-- زر: "جدّد اشتراكك" → يروح لصفحة pricing
-- زر: تواصل مع الدعم
+### 5.3 Views
+- `resources/views/billing/show.blade.php` — صفحة الاشتراك + اختيار خطة/دورة + زر "ادفع"
+- `resources/views/subscription/expired.blade.php` — "انتهى اشتراكك" + زر تجديد → `billing.show`
 
 ---
 
-## المرحلة 6: Filament Resources للـ Super Admin
+## المرحلة 6: Middleware حماية الاشتراك
 
-### 6.1 PlanResource
-**الملف:** `app/Filament/Resources/PlanResource.php`
-- Form: name (ar/en), slug, price_monthly, price_yearly, max_users, max_cases, ai_enabled, is_active
-- Table: name, slug, price_monthly, subscriptions count, is_active
-- مرئي لـ super_admin فقط
+### 6.1 `app/Http/Middleware/CheckSubscription.php` (جديد)
+- يتجاوز: غير المسجّلين، `super_admin`، ومسارات `billing.*` و`subscription.expired`
+- لو المكتب `! hasUsableSubscription()` → `redirect()->route('subscription.expired')`
 
-### 6.2 SubscriptionResource
-**الملف:** `app/Filament/Resources/SubscriptionResource.php`
-- Table: office name, plan name, status, billing_cycle, current_period_end
+### 6.2 تسجيل + تطبيق
+- `bootstrap/app.php`: إضافة alias `'check.subscription'` بجانب `client.portal` الموجود
+- `app/Providers/Filament/AdminPanelProvider.php`: إضافة `CheckSubscription::class` إلى `authMiddleware([...])` (بعد `Authenticate`)
+
+---
+
+## المرحلة 7: لوحة المنصة (Filament — super_admin فقط)
+
+### 7.1 صلاحيات
+تعديل `database/seeders/RolesAndPermissionsSeeder.php`: إضافة `'plans'` و`'subscriptions'` لمصفوفة `$resources` (تتولّد صلاحياتهما تلقائياً، وتُمنح كلها لـ super_admin).
+
+### 7.2 `app/Filament/Resources/PlanResource.php`
+- Form: name(ar/en), slug, price_monthly, price_yearly, currency, max_users/cases/storage, ai_enabled, custom_branding, features(Repeater), is_active, sort_order
+- Table: name, slug, price_monthly, عدد الاشتراكات، is_active
+- navigationGroup: `'الإدارة'`
+
+### 7.3 `app/Filament/Resources/SubscriptionResource.php`
+- Table: اسم المكتب، الخطة، الحالة(badge)، الدورة، تاريخ الانتهاء، أيام متبقية
 - Filters: status, plan
-- Actions: activate, cancel, extend
-- مرئي لـ super_admin فقط
+- Actions يدوية (للحالات الخاصة): تفعيل، تمديد فترة، إلغاء
+- RelationManager: `SubscriptionPayments` (سجل المدفوعات)
 
-### 6.3 SubscriptionStatusWidget
-**الملف:** `app/Filament/Widgets/SubscriptionStatusWidget.php`
-- يظهر في الـ dashboard لكل مكتب
-- يعرض: اسم الخطة، الحالة، تاريخ الانتهاء
-- لو قرب الانتهاء (أقل من 7 أيام) → warning باللون الأصفر
-- زر: "ترقية الخطة"
+### 7.4 Policies (super_admin فقط)
+`app/Policies/PlanPolicy.php` + `SubscriptionPolicy.php` — تعيد `super_admin` في كل الدوال (نفس نمط `OfficePolicy` المعدّل). الموديلات تُسجّل في `AppServiceProvider` لو كان هناك تسجيل صريح، وإلا Laravel يكتشفها تلقائياً.
 
----
+### 7.5 `app/Filament/Widgets/SubscriptionStatusWidget.php`
+- يظهر في `/admin` لكل office_admin: اسم الخطة، الحالة، أيام متبقية
+- لو `daysLeft() <= 7` → تنبيه أصفر + زر "جدّد/رقّ" → `billing.show`
+- مخفي لـ super_admin
 
-## ترتيب التنفيذ (خطوة خطوة)
-
-```
-1. php artisan make:migration create_plans_table
-2. php artisan make:migration create_subscriptions_table
-3. إنشاء Plan.php model
-4. إنشاء Subscription.php model
-5. تعديل Office.php model (إضافة العلاقات)
-6. إنشاء PlanSeeder + تسجيله في DatabaseSeeder
-7. php artisan migrate
-8. php artisan db:seed --class=PlanSeeder
-9. إنشاء SaasLandingController
-10. تعديل LandingController (إضافة office method)
-11. تعديل routes/web.php
-12. إنشاء views/saas/landing.blade.php
-13. إنشاء views/saas/pricing.blade.php
-14. إنشاء OnboardingController
-15. إنشاء views/onboarding/plans.blade.php
-16. إنشاء views/onboarding/setup.blade.php
-17. إنشاء views/onboarding/success.blade.php
-18. إنشاء CheckSubscription middleware
-19. تسجيل middleware في bootstrap/app.php
-20. تطبيقه على AdminPanelProvider
-21. إنشاء views/subscription/expired.blade.php
-22. إنشاء PlanResource في Filament
-23. إنشاء SubscriptionResource في Filament
-24. إنشاء SubscriptionStatusWidget
-```
+### 7.6 `app/Filament/Pages/PlatformSettingsPage.php` (super_admin فقط) — التحكم في صفحة ميزان
+- صفحة بنفس نمط `OfficeSettingsPage`/`LandingSettingsPage` الموجودة
+- أقسام الفورم: العنوان الرئيسي + الوصف، الإحصائيات، 6 بطاقات مميزات (Repeater)، شعار ميزان (FileUpload)، بيانات تواصل المنصة
+- `mount()` تملأ من `PlatformSetting::current()`؛ `save()` تحفظ في صف الـ singleton
+- `navigationGroup: 'الإعدادات'`، مرئية لـ super_admin فقط (`canAccess()` يتحقق من الدور)
 
 ---
 
-## التحقق من النجاح
+## المرحلة 8: Seeders والبيانات
 
+### 8.1 `database/seeders/PlanSeeder.php` (جديد)
+4 خطط بـ `updateOrCreate(['slug'=>...])`. **التجربة المجانية (30 يوم) تمنح كل مميزات خطة pro** أثناء الشهر، ثم يختار العميل خطة مدفوعة:
+| slug | شهري | سنوي | users | cases | AI | branding | ملاحظة |
+|------|------|------|-------|-------|----|----|----|
+| trial | 0 | 0 | 15 | 200 | ✅ | ❌ | تلقائية 30 يوم لكل مكتب جديد، كل المميزات |
+| basic | 199 | 1990 | 5 | 50 | ❌ | ❌ | |
+| pro | 499 | 4990 | 15 | 200 | ✅ | ❌ | |
+| enterprise | 999 | 9990 | 9999 | 9999 | ✅ | ✅ | |
+
+### 8.2 تعديل `DatabaseSeeder.php`
+إضافة `PlanSeeder::class` للقائمة.
+
+### 8.3 تعديل `DemoDataSeeder.php`
+بعد إنشاء المكتب، إنشاء `Subscription` نشط له (plan=pro, status=active, current_period_end=+سنة) حتى لا يُحظر المكتب التجريبي بالـ middleware.
+
+---
+
+## ترتيب التنفيذ
+```
+0.  git checkout -b saas-platform  + كتابة SAAS_PLAN.md في المشروع
+1.  4 migrations (plans, subscriptions, platform_settings, subscription_payments)
+2.  Models: Plan, Subscription, SubscriptionPayment, PlatformSetting + تعديل Office
+3.  RolesAndPermissionsSeeder (+plans, +subscriptions) + PlanSeeder + DatabaseSeeder
+4.  php artisan migrate + db:seed
+5.  config/services.php (platform_billing) + .env (APP_NAME=ميزان) + .env.example
+6.  PlatformBillingService
+7.  SaasLandingController (يقرأ PlatformSetting) + LandingController::office + routes
+8.  Views: saas/landing, saas/pricing (+ navbar/footer partials)
+9.  OnboardingController + 3 views
+10. SubscriptionBillingController + routes + 2 views (billing.show, subscription.expired)
+11. CheckSubscription middleware + تسجيل + تطبيق على AdminPanelProvider
+12. PlanResource + SubscriptionResource + Policies + Widget
+13. PlatformSettingsPage (تحكم super_admin في صفحة ميزان)
+14. تعديل DemoDataSeeder (subscription للمكتب الموجود)
+15. npm run build + اختبار شامل
+```
+
+---
+
+## التحقق (Verification)
 | الاختبار | المتوقع |
 |----------|---------|
-| `GET /` | يعرض صفحة المنصة التسويقية |
-| `GET /pricing` | يعرض 4 خطط بالأسعار |
-| `GET /offices/amer` | يعرض صفحة مكتب عامر |
-| `GET /register` | يعرض اختيار الخطة |
-| تسجيل مكتب جديد | ينشئ office + user + subscription |
-| الدخول بـ office_admin | يدخل admin panel بشكل طبيعي |
-| بعد انتهاء trial | يُعاد التوجيه لـ /subscription/expired |
-| `super@mizan.test` | يرى PlanResource + SubscriptionResource |
-| Widget في dashboard | يعرض الخطة الحالية والتاريخ |
+| `GET /` | صفحة المنصة التسويقية (لا تعتمد على مكتب واحد) |
+| `GET /pricing` | الخطط الـ4 بالأسعار |
+| `GET /offices/amer` | صفحة مكتب عامر التعريفية |
+| `GET /register` → اختيار خطة → بيانات → حفظ | إنشاء office + user(office_admin) + subscription(trial **30 يوم**) وتسجيل دخول تلقائي |
+| office_admin يدخل `/admin` أثناء التجربة (الشهر المجاني) | يعمل طبيعي بكل المميزات + Widget يعرض أيام التجربة المتبقية |
+| دفع خطة من `/admin/billing` | تحويل لبوابة المنصة → بعد الدفع: subscription=active وtransaction مسجّلة |
+| webhook من البوابة | يفعّل الاشتراك حتى لو لم يرجع المستخدم |
+| انتهاء الشهر المجاني بدون دفع | إعادة توجيه لـ `/subscription/expired` (ما عدا صفحات billing) |
+| `super@mizan.test` | يرى Plans + Subscriptions + إعدادات منصة ميزان في `/admin`؛ office_admin لا يراها |
+| super_admin يعدّل صفحة ميزان من `PlatformSettingsPage` | التغيير يظهر فوراً على `GET /` |
+| office_admin يعدّل صفحته من `LandingSettingsPage` | التغيير يظهر فوراً على `GET /offices/{slug}` فقط |
+| المكتب التجريبي (DemoData) | لا يُحظر (عنده اشتراك نشط) |
 
 ---
 
-## ملاحظات مهمة
-
-1. **الـ DemoDataSeeder** — بعد التنفيذ يجب إضافة subscription للمكتب الموجود:
-```php
-Subscription::create([
-    'office_id' => $office->id,
-    'plan_id'   => Plan::where('slug', 'pro')->first()->id,
-    'status'    => 'active',
-    'billing_cycle' => 'monthly',
-    'current_period_start' => now(),
-    'current_period_end'   => now()->addYear(),
-]);
-```
-
-2. **الـ super_admin** — لا يحتاج subscription ويتجاوز الـ middleware
-
-3. **الصفحة التسويقية** — تستخدم نفس Alpine.js و Tajawal font الموجودين حالياً
-
-4. **Payment للاشتراكات** — هذه المرحلة لا تشمل دفع حقيقي للاشتراكات (يدوي من super_admin)، الدفع الإلكتروني للاشتراكات يُضاف لاحقاً
+## ملاحظات ومخاطر
+1. **مصدر تأكيد الدفع الموثوق هو الـ webhook** وليس رجوع المستخدم (قد يغلق المتصفح). الـ callback تحسين UX فقط.
+2. **Paymob أنسب للسوق المصري** (تدفق redirect→iframe يطابق الكود الموجود). Stripe يتطلب Stripe.js في الواجهة لإتمام الكارت — مدعوم لكن أعقد؛ نبدأ بـ Paymob.
+3. **لا نحتاج `laravel/cashier`** — نعيد استخدام كلاسات البوابات الموجودة. (Cashier بديل مجاني لكنه Stripe-only ويضيف تعقيداً غير مبرر هنا.)
+4. **فرض حدود الخطة** (max_users/max_cases) خارج نطاق هذه المرحلة — يُضاف لاحقاً كـ checks في الـ Resources. الخطة الحالية تركّز على: تسجيل + تجربة + تحصيل + حظر عند الانتهاء.
+5. **الاختبار بوضع البوابة التجريبي (`test_mode`)** قبل الإنتاج — البوابات تدعمه عبر config.

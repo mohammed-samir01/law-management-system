@@ -10,7 +10,9 @@ use App\Models\Invoice;
 use App\Models\LegalCase;
 use App\Models\Office;
 use App\Models\Payment;
+use App\Models\Plan;
 use App\Models\PowerOfAttorney;
+use App\Models\Subscription;
 use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
@@ -22,6 +24,7 @@ class DemoDataSeeder extends Seeder
     {
         DB::transaction(function () {
             $office = $this->createOffice();
+            $this->createSubscription($office);
             $users  = $this->createUsers($office);
             $clients = $this->createClients($office, $users['admin']);
             $cases   = $this->createCases($office, $clients, $users);
@@ -30,6 +33,26 @@ class DemoDataSeeder extends Seeder
             $this->createPaymentsAndInvoices($office, $cases, $clients, $users['admin']);
             $this->createEnforcementFiles($office, $cases, $users['admin']);
         });
+    }
+
+    private function createSubscription(Office $office): void
+    {
+        $plan = Plan::where('slug', 'pro')->first();
+
+        if (! $plan) {
+            return;
+        }
+
+        Subscription::updateOrCreate(
+            ['office_id' => $office->id],
+            [
+                'plan_id'              => $plan->id,
+                'status'               => 'active',
+                'billing_cycle'        => 'yearly',
+                'current_period_start' => now(),
+                'current_period_end'   => now()->addYear(),
+            ]
+        );
     }
 
     private function createOffice(): Office

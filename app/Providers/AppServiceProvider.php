@@ -16,7 +16,9 @@ use App\Models\Legislation;
 use App\Models\Office;
 use App\Models\Payment;
 use App\Models\PaymentGateway;
+use App\Models\Plan;
 use App\Models\PowerOfAttorney;
+use App\Models\Subscription;
 use App\Models\SupportTicket;
 use App\Models\User;
 use App\Observers\DocumentObserver;
@@ -38,7 +40,9 @@ use App\Policies\LegislationPolicy;
 use App\Policies\OfficePolicy;
 use App\Policies\PaymentGatewayPolicy;
 use App\Policies\PaymentPolicy;
+use App\Policies\PlanPolicy;
 use App\Policies\PowerOfAttorneyPolicy;
+use App\Policies\SubscriptionPolicy;
 use App\Policies\SupportTicketPolicy;
 use App\Policies\UserPolicy;
 use Illuminate\Support\Facades\Artisan;
@@ -80,6 +84,8 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(CaseLaw::class,          CaseLawPolicy::class);
         Gate::policy(SupportTicket::class,    SupportTicketPolicy::class);
         Gate::policy(AIResult::class,         AIResultPolicy::class);
+        Gate::policy(Plan::class,             PlanPolicy::class);
+        Gate::policy(Subscription::class,     SubscriptionPolicy::class);
 
         // super_admin bypasses all policies
         Gate::before(function (User $user, string $ability) {

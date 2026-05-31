@@ -3,12 +3,40 @@
 use App\Http\Controllers\DocumentPDFController;
 use App\Http\Controllers\ImageEditorController;
 use App\Http\Controllers\LandingController;
+use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Portal\AuthController;
 use App\Http\Controllers\Portal\DashboardController;
 use App\Http\Controllers\Portal\InvoiceController;
+use App\Http\Controllers\SaasLandingController;
+use App\Http\Controllers\SubscriptionBillingController;
+use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', [LandingController::class, 'index'])->name('home');
+// ── Mizan platform marketing pages ──────────────────────────────
+Route::get('/', [SaasLandingController::class, 'index'])->name('home');
+Route::get('/pricing', [SaasLandingController::class, 'pricing'])->name('pricing');
+
+// Each office's public landing page
+Route::get('/offices/{slug}', [LandingController::class, 'office'])->name('office.landing');
+
+// Office self-registration (onboarding)
+Route::prefix('register')->name('register.')->group(function () {
+    Route::get('/', [OnboardingController::class, 'showPlans'])->name('plans');
+    Route::post('/plan', [OnboardingController::class, 'selectPlan'])->name('plan.select');
+    Route::get('/setup', [OnboardingController::class, 'showSetup'])->name('setup');
+    Route::post('/setup', [OnboardingController::class, 'register'])->name('store');
+    Route::get('/success', [OnboardingController::class, 'success'])->name('success');
+});
+
+// Subscription billing (office pays Mizan)
+Route::middleware('auth')->group(function () {
+    Route::get('/admin/billing', [SubscriptionBillingController::class, 'show'])->name('billing.show');
+    Route::post('/admin/billing/checkout', [SubscriptionBillingController::class, 'checkout'])->name('billing.checkout');
+    Route::get('/admin/billing/callback/{payment}', [SubscriptionBillingController::class, 'callback'])->name('billing.callback');
+    Route::view('/subscription/expired', 'subscription.expired')->name('subscription.expired');
+});
+Route::post('/billing/webhook', [SubscriptionBillingController::class, 'webhook'])
+    ->withoutMiddleware([VerifyCsrfToken::class])->name('billing.webhook');
 
 // Image editor — admin only
 Route::middleware('auth')->post('/admin/image-editor/save', [ImageEditorController::class, 'save'])->name('image-editor.save');

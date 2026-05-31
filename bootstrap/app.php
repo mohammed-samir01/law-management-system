@@ -51,7 +51,8 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $middleware->alias([
-            'client.portal' => \App\Http\Middleware\EnsureClientRole::class,
+            'client.portal'      => \App\Http\Middleware\EnsureClientRole::class,
+            'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {
