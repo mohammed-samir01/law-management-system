@@ -11,7 +11,9 @@ class UserPolicy
 
     public function viewAny(User $user): bool
     {
-        return $this->isStaff($user);
+        // Managing users is an admin task; lawyers/assistants don't see the list.
+        // (super_admin is allowed via the global Gate::before bypass.)
+        return $this->isOfficeAdmin($user);
     }
 
     public function view(User $user, User $model): bool

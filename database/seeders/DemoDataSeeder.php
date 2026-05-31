@@ -104,11 +104,12 @@ class DemoDataSeeder extends Seeder
 
     private function createUsers(Office $office): array
     {
+        // Platform owner — NOT tied to any office (manages the whole platform).
         $super = User::create([
             'name'      => 'Super Admin',
             'email'     => 'super@amer.test',
             'password'  => Hash::make('password'),
-            'office_id' => $office->id,
+            'office_id' => null,
             'is_active' => true,
             'email_verified_at' => now(),
         ]);
