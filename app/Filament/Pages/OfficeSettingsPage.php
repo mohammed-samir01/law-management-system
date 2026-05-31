@@ -20,6 +20,17 @@ class OfficeSettingsPage extends Page
 
     public ?array $data = [];
 
+    public static function canAccess(): bool
+    {
+        // Office-level page: for the office manager, not the platform owner.
+        return auth()->user()?->hasRole('office_admin') ?? false;
+    }
+
+    public static function shouldRegisterNavigation(): bool
+    {
+        return auth()->user()?->hasRole('office_admin') ?? false;
+    }
+
     public function mount(): void
     {
         $office = Office::find(Auth::user()->office_id);
