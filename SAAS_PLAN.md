@@ -219,6 +219,9 @@ PAYMOB_IFRAME_ID=
 PAYMOB_HMAC_SECRET=
 ```
 
+### 2.0 ⚙️ إدارة ديناميكية من لوحة التحكم (مُنفّذ)
+بوابة دفع المنصة ومفاتيحها تُدار بالكامل من لوحة التحكم: **الإعدادات ← بوابة دفع المنصة** (`PlatformBillingSettingsPage`، super_admin فقط). تُخزَّن المفاتيح **مشفّرة** في `platform_settings.billing_config` (cast `encrypted:array`)، مع زر **اختبار الاتصال**. إعدادات `.env`/`config/services` أصبحت **fallback اختياري فقط** — لا حاجة لتعديل الكود أو السيرفر.
+
 ### 2.2 `app/Services/Billing/PlatformBillingService.php` (جديد)
 خدمة خفيفة تُنشئ كلاس البوابة الموجود بمفاتيح المنصة (وليس مفاتيح مكتب):
 ```php

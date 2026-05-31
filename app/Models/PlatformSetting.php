@@ -11,7 +11,29 @@ class PlatformSetting extends Model
     protected function casts(): array
     {
         return [
-            'data' => 'array',
+            'data'              => 'array',
+            'billing_config'    => 'encrypted:array',
+            'billing_test_mode' => 'boolean',
+        ];
+    }
+
+    /**
+     * Resolve the platform billing settings — prefers the dashboard-managed
+     * values (DB), falling back to config/services (.env) when not set.
+     *
+     * @return array{gateway:string, config:array, test_mode:bool}
+     */
+    public static function billing(): array
+    {
+        $row = static::query()->first();
+
+        $gateway = $row?->billing_gateway ?: config('services.platform_billing.gateway', 'paymob');
+        $config  = $row?->billing_config ?: (config("services.platform_billing.$gateway", []) ?: []);
+
+        return [
+            'gateway'   => $gateway,
+            'config'    => array_filter($config, fn ($v) => $v !== null && $v !== ''),
+            'test_mode' => $row?->billing_test_mode ?? true,
         ];
     }
 

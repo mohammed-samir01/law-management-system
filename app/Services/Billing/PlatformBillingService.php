@@ -3,6 +3,7 @@
 namespace App\Services\Billing;
 
 use App\Models\Plan;
+use App\Models\PlatformSetting;
 use App\Services\Payment\Gateways\PaymobGateway;
 use App\Services\Payment\Gateways\StripeGateway;
 use App\Services\Payment\PaymentGatewayInterface;
@@ -11,9 +12,9 @@ use RuntimeException;
 /**
  * Platform-level billing — charges OFFICES for their Mizan subscriptions.
  *
- * Reuses the existing gateway classes (PaymobGateway / StripeGateway) but
- * instantiates them with the PLATFORM's own credentials from config/services
- * instead of a per-office DB record.
+ * Reuses the existing gateway classes (PaymobGateway / StripeGateway). The
+ * gateway choice and API keys are managed dynamically from the dashboard
+ * (PlatformSetting, encrypted), falling back to config/services (.env).
  */
 class PlatformBillingService
 {
@@ -24,31 +25,32 @@ class PlatformBillingService
 
     public static function gatewayName(): string
     {
-        return config('services.platform_billing.gateway', 'paymob');
+        return PlatformSetting::billing()['gateway'] ?: 'paymob';
     }
 
     public static function gateway(): PaymentGatewayInterface
     {
-        $name   = self::gatewayName();
-        $class  = self::$map[$name] ?? null;
-        $config = config("services.platform_billing.$name", []);
+        $billing = PlatformSetting::billing();
+        $name    = $billing['gateway'] ?: 'paymob';
+        $class   = self::$map[$name] ?? null;
+        $config  = $billing['config'];
 
         if (! $class) {
             throw new RuntimeException("بوابة دفع المنصة غير معروفة: {$name}");
         }
 
-        if (empty(array_filter($config))) {
-            throw new RuntimeException('لم يتم إعداد مفاتيح بوابة دفع المنصة في إعدادات السيرفر.');
+        if (empty($config)) {
+            throw new RuntimeException('لم يتم إعداد بوابة دفع المنصة. يرجى ضبطها من لوحة التحكم: الإعدادات ← بوابة دفع المنصة.');
         }
+
+        $config['test_mode'] = $billing['test_mode'];
 
         return new $class($config);
     }
 
     public static function isConfigured(): bool
     {
-        $config = config('services.platform_billing.' . self::gatewayName(), []);
-
-        return ! empty(array_filter($config));
+        return ! empty(PlatformSetting::billing()['config']);
     }
 
     public static function priceFor(Plan $plan, string $cycle): float
