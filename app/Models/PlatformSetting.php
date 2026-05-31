@@ -86,11 +86,22 @@ class PlatformSetting extends Model
                 ['icon' => 'cash',      'title_ar' => 'الفواتير والمدفوعات',  'title_en' => 'Invoices & Payments','desc_ar' => 'فواتير احترافية وتحصيل أونلاين عبر بوابات دفع متعددة.',                'desc_en' => 'Professional invoices and online collection via multiple gateways.'],
                 ['icon' => 'sparkles',  'title_ar' => 'الذكاء الاصطناعي',     'title_en' => 'AI Assistant',      'desc_ar' => 'تلخيص الوثائق وتحليل العقود واقتراح الاستراتيجيات القانونية.',           'desc_en' => 'Summarize documents, analyze contracts, and suggest legal strategies.'],
             ],
+            'why_us' => [
+                ['icon' => 'shield',  'title_ar' => 'أمان وخصوصية',   'title_en' => 'Security & Privacy',  'desc_ar' => 'بياناتك مشفّرة ومحمية بأعلى المعايير، وكل مكتب معزول تماماً عن غيره.',  'desc_en' => 'Your data is encrypted and protected to the highest standards, fully isolated per office.'],
+                ['icon' => 'bolt',    'title_ar' => 'سهولة وسرعة',    'title_en' => 'Fast & Simple',       'desc_ar' => 'واجهة عربية أنيقة وسريعة، تبدأ خلال دقائق بدون تعقيد أو تدريب طويل.',     'desc_en' => 'An elegant, fast Arabic interface — get started in minutes, no long training.'],
+                ['icon' => 'headset', 'title_ar' => 'دعم متواصل',     'title_en' => 'Dedicated Support',   'desc_ar' => 'فريق دعم جاهز لمساعدتك في أي وقت لضمان عمل مكتبك بسلاسة.',                'desc_en' => 'A support team ready to help anytime to keep your office running smoothly.'],
+                ['icon' => 'refresh', 'title_ar' => 'تحديثات مستمرة', 'title_en' => 'Continuous Updates',  'desc_ar' => 'نطوّر المنصة باستمرار ونضيف مميزات جديدة دون أي تكلفة إضافية.',           'desc_en' => 'We continuously improve the platform and add features at no extra cost.'],
+            ],
             'contact' => [
-                'phone'    => '+20 100 000 0000',
-                'email'    => 'info@mizan.com',
-                'whatsapp' => '201000000000',
-                'address'  => 'مصر',
+                'phone'      => '+20 100 000 0000',
+                'email'      => 'info@mizan.com',
+                'whatsapp'   => '201000000000',
+                'address_ar' => 'مصر — القاهرة',
+                'address_en' => 'Egypt — Cairo',
+                'facebook'   => null,
+                'twitter_x'  => null,
+                'instagram'  => null,
+                'linkedin'   => null,
             ],
         ];
     }

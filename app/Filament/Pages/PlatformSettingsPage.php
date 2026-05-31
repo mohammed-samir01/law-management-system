@@ -92,11 +92,34 @@ class PlatformSettingsPage extends Page
                             ->defaultItems(0),
                     ]),
 
+                    Forms\Components\Tabs\Tab::make('لماذا نحن')->schema([
+                        Forms\Components\Repeater::make('why_us')
+                            ->label('أسباب الاختيار')
+                            ->schema([
+                                Forms\Components\Select::make('icon')->label('الأيقونة')->options([
+                                    'shield' => 'درع (أمان)', 'bolt' => 'برق (سرعة)', 'headset' => 'دعم',
+                                    'refresh' => 'تحديث', 'star' => 'نجمة', 'heart' => 'قلب',
+                                ])->default('shield'),
+                                Forms\Components\TextInput::make('title_ar')->label('العنوان (عربي)')->required(),
+                                Forms\Components\TextInput::make('title_en')->label('العنوان (إنجليزي)'),
+                                Forms\Components\Textarea::make('desc_ar')->label('الوصف (عربي)')->rows(2)->columnSpanFull(),
+                                Forms\Components\Textarea::make('desc_en')->label('الوصف (إنجليزي)')->rows(2)->columnSpanFull(),
+                            ])
+                            ->columns(3)
+                            ->addActionLabel('إضافة سبب')
+                            ->defaultItems(0),
+                    ]),
+
                     Forms\Components\Tabs\Tab::make('التواصل')->schema([
                         Forms\Components\TextInput::make('contact.phone')->label('الهاتف'),
                         Forms\Components\TextInput::make('contact.email')->label('البريد الإلكتروني')->email(),
-                        Forms\Components\TextInput::make('contact.whatsapp')->label('واتساب'),
-                        Forms\Components\TextInput::make('contact.address')->label('العنوان'),
+                        Forms\Components\TextInput::make('contact.whatsapp')->label('واتساب (أرقام فقط)'),
+                        Forms\Components\TextInput::make('contact.address_ar')->label('العنوان (عربي)'),
+                        Forms\Components\TextInput::make('contact.address_en')->label('العنوان (إنجليزي)'),
+                        Forms\Components\TextInput::make('contact.facebook')->label('فيسبوك')->url(),
+                        Forms\Components\TextInput::make('contact.twitter_x')->label('X (تويتر)')->url(),
+                        Forms\Components\TextInput::make('contact.instagram')->label('إنستغرام')->url(),
+                        Forms\Components\TextInput::make('contact.linkedin')->label('لينكدإن')->url(),
                     ])->columns(2),
 
                 ]),

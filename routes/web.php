@@ -6,6 +6,7 @@ use App\Http\Controllers\LandingController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Portal\AuthController;
 use App\Http\Controllers\Portal\DashboardController;
+use App\Http\Controllers\PlatformContactController;
 use App\Http\Controllers\Portal\InvoiceController;
 use App\Http\Controllers\SaasLandingController;
 use App\Http\Controllers\SubscriptionBillingController;
@@ -15,6 +16,7 @@ use Illuminate\Support\Facades\Route;
 // ── Mizan platform marketing pages ──────────────────────────────
 Route::get('/', [SaasLandingController::class, 'index'])->name('home');
 Route::get('/pricing', [SaasLandingController::class, 'pricing'])->name('pricing');
+Route::post('/contact-platform', [PlatformContactController::class, 'store'])->name('platform.contact');
 
 // Each office's public landing page
 Route::get('/offices/{slug}', [LandingController::class, 'office'])->name('office.landing');
