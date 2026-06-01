@@ -8,13 +8,63 @@ class PlatformSetting extends Model
 {
     protected $guarded = [];
 
+    protected static function booted(): void
+    {
+        // Any change to platform settings invalidates the cached `data`.
+        static::saved(fn () => \Illuminate\Support\Facades\Cache::forget('platform_settings_data'));
+    }
+
     protected function casts(): array
     {
         return [
             'data'              => 'array',
             'billing_config'    => 'encrypted:array',
             'billing_test_mode' => 'boolean',
+            'mail_config'       => 'encrypted:array',
         ];
+    }
+
+    /**
+     * Read a setting from the singleton `data` JSON using dot-notation,
+     * with a safe default. Cached for 60s to avoid a query per request.
+     * Safe to call before the table exists (returns default).
+     */
+    public static function get(string $key, mixed $default = null): mixed
+    {
+        try {
+            $data = \Illuminate\Support\Facades\Cache::remember(
+                'platform_settings_data',
+                60,
+                fn () => static::query()->value('data') ?? []
+            );
+        } catch (\Throwable) {
+            return $default;
+        }
+
+        return data_get($data, $key, $default);
+    }
+
+    /**
+     * Merge values into the singleton `data` JSON and clear the cache.
+     */
+    public static function put(array $values): void
+    {
+        $row  = static::singleton();
+        $data = array_replace_recursive($row->data ?? [], $values);
+        $row->update(['data' => $data]);
+
+        \Illuminate\Support\Facades\Cache::forget('platform_settings_data');
+    }
+
+    /**
+     * Resolve the platform mail (SMTP) settings — dashboard-managed (encrypted),
+     * falling back to config/.env when not set.
+     */
+    public static function mail(): array
+    {
+        $row = static::query()->first();
+
+        return $row?->mail_config ?: [];
     }
 
     /**

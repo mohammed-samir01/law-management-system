@@ -15,3 +15,6 @@ Schedule::job(new DispatchHearingRemindersJob(24))->dailyAt('08:00');
 
 // Run daily at midnight — mark overdue invoices and notify admins
 Schedule::job(new CheckOverdueInvoicesJob())->dailyAt('00:05');
+
+// Run daily — expire subscriptions whose trial/period has ended
+Schedule::command('subscriptions:enforce')->dailyAt('00:10');

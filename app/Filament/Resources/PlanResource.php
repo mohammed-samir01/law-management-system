@@ -41,7 +41,17 @@ class PlanResource extends Resource
                 Forms\Components\TextInput::make('max_users')->label('عدد المستخدمين')->numeric()->minValue(1)->default(5)->required(),
                 Forms\Components\TextInput::make('max_cases')->label('عدد القضايا')->numeric()->minValue(1)->default(50)->required(),
                 Forms\Components\TextInput::make('max_storage_mb')->label('التخزين (ميجابايت)')->numeric()->minValue(0)->default(1024)->required(),
-                Forms\Components\Toggle::make('ai_enabled')->label('الذكاء الاصطناعي مفعّل')->default(false),
+                Forms\Components\Toggle::make('ai_enabled')->label('الذكاء الاصطناعي مفعّل')->default(false)->live(),
+                Forms\Components\TextInput::make('max_ai_requests_monthly')
+                    ->label('حد طلبات الذكاء الاصطناعي شهرياً')
+                    ->numeric()->minValue(0)
+                    ->helperText('اتركه فارغاً = غير محدود')
+                    ->visible(fn (Forms\Get $get) => $get('ai_enabled')),
+                Forms\Components\TextInput::make('max_ai_tokens_monthly')
+                    ->label('حد التوكنز شهرياً')
+                    ->numeric()->minValue(0)
+                    ->helperText('اتركه فارغاً = غير محدود')
+                    ->visible(fn (Forms\Get $get) => $get('ai_enabled')),
                 Forms\Components\Toggle::make('custom_branding')->label('علامة تجارية مخصصة')->default(false),
                 Forms\Components\Toggle::make('is_active')->label('الخطة مفعّلة')->default(true),
                 Forms\Components\TextInput::make('sort_order')->label('الترتيب')->numeric()->default(0),

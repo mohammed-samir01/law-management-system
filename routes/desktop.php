@@ -13,7 +13,7 @@ use Illuminate\Support\Facades\Route;
 // ─── Desktop Auth (guest) ──────────────────────────────────────────────────
 Route::prefix('desktop')->name('desktop.')->middleware('guest')->group(function () {
     Route::get('login',  [DesktopAuthController::class, 'showLogin'])->name('login');
-    Route::post('login', [DesktopAuthController::class, 'login'])->name('login.post');
+    Route::post('login', [DesktopAuthController::class, 'login'])->name('login.post')->middleware('throttle:login');
 });
 
 Route::prefix('desktop')->name('desktop.')->middleware('auth')->group(function () {

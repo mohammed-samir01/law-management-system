@@ -92,6 +92,7 @@ class SubscriptionResource extends Resource
                         Forms\Components\Select::make('billing_cycle')->label('الدورة')->options(['monthly' => 'شهري', 'yearly' => 'سنوي'])->default('monthly')->required(),
                     ])
                     ->action(function (Subscription $record, array $data) {
+                        $wasSuspended = ! $record->isUsable();
                         $end = $data['billing_cycle'] === 'yearly' ? now()->addYear() : now()->addMonth();
                         $record->update([
                             'status'               => 'active',
@@ -99,6 +100,9 @@ class SubscriptionResource extends Resource
                             'current_period_start' => now(),
                             'current_period_end'   => $end,
                         ]);
+                        if ($wasSuspended) {
+                            \App\Services\SubscriptionReactivation::forceReVerify($record->office_id);
+                        }
                     }),
 
                 Tables\Actions\Action::make('extend')

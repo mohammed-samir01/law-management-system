@@ -91,6 +91,7 @@ class UserResource extends Resource
                     ->label('الصورة الشخصية')
                     ->image()
                     ->directory('users/avatars')
+                    ->maxSize(fn () => \App\Models\PlatformSetting::get('media.avatar_max_kb', 2048))
                     ->nullable(),
                 Forms\Components\Textarea::make('bio')
                     ->label('نبذة تعريفية')

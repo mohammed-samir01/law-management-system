@@ -114,7 +114,14 @@ class DocumentResource extends Resource
                             ->label('رفع الملف')
                             ->collection('files')
                             ->multiple()
-                            ->maxSize(20480)
+                            ->maxSize(fn () => \App\Models\PlatformSetting::get('media.max_upload_kb', 10240))
+                            ->acceptedFileTypes(fn () => \App\Models\PlatformSetting::get('media.allowed_mimes', [
+                                'application/pdf', 'image/jpeg', 'image/png', 'image/webp',
+                                'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+                                'application/vnd.ms-excel', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+                                'application/vnd.ms-powerpoint', 'application/vnd.openxmlformats-officedocument.presentationml.presentation',
+                                'application/zip',
+                            ]))
                             ->columnSpanFull(),
                     ]),
             ]);
@@ -283,6 +290,7 @@ class DocumentResource extends Resource
                         ->color('info')
                         ->requiresConfirmation()
                         ->action(function (Document $record) {
+                            if (! static::guardAi()) return;
                             AIProcessJob::dispatch($record, 'summarize_document', 'ar', auth()->id());
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),
@@ -293,6 +301,7 @@ class DocumentResource extends Resource
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(function (Document $record) {
+                            if (! static::guardAi()) return;
                             AIProcessJob::dispatch($record, 'analyze_contract', 'ar', auth()->id());
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),
@@ -320,6 +329,26 @@ class DocumentResource extends Resource
     public static function getRelations(): array
     {
         return [];
+    }
+
+    /**
+     * Enforce plan AI access + monthly quota before dispatching an AI job.
+     * Returns false (with a notification) when not allowed.
+     */
+    public static function guardAi(): bool
+    {
+        $office = auth()->user()?->office;
+        if (! $office) {
+            return true;
+        }
+
+        try {
+            app(\App\Services\AIUsageService::class)->assertAllowed($office);
+            return true;
+        } catch (\Throwable $e) {
+            Notification::make()->title('غير مسموح')->body($e->getMessage())->danger()->send();
+            return false;
+        }
     }
 
     public static function getPages(): array

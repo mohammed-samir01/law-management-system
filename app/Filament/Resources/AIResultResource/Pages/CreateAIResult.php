@@ -36,6 +36,17 @@ class CreateAIResult extends CreateRecord
             $this->halt();
         }
 
+        // Enforce plan AI access + monthly quota.
+        $office = auth()->user()->office;
+        if ($office) {
+            try {
+                app(\App\Services\AIUsageService::class)->assertAllowed($office);
+            } catch (\Throwable $e) {
+                Notification::make()->title('غير مسموح')->body($e->getMessage())->danger()->send();
+                $this->halt();
+            }
+        }
+
         try {
             AIProcessJob::dispatch($morphable, $action, $language, auth()->id());
         } catch (\Throwable $e) {

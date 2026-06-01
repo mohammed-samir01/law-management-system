@@ -18,12 +18,14 @@ class Plan extends Model
     protected function casts(): array
     {
         return [
-            'price_monthly'   => 'decimal:2',
-            'price_yearly'    => 'decimal:2',
-            'features'        => 'array',
-            'ai_enabled'      => 'boolean',
-            'custom_branding' => 'boolean',
-            'is_active'       => 'boolean',
+            'price_monthly'           => 'decimal:2',
+            'price_yearly'            => 'decimal:2',
+            'features'                => 'array',
+            'ai_enabled'              => 'boolean',
+            'custom_branding'         => 'boolean',
+            'is_active'               => 'boolean',
+            'max_ai_requests_monthly' => 'integer',
+            'max_ai_tokens_monthly'   => 'integer',
         ];
     }
 

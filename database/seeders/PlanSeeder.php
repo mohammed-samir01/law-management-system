@@ -20,6 +20,7 @@ class PlanSeeder extends Seeder
                 'max_cases'       => 200,
                 'max_storage_mb'  => 10240,
                 'ai_enabled'      => true,
+                'max_ai_requests_monthly' => 50,
                 'custom_branding' => false,
                 'features'        => [
                     'كل المميزات لمدة 30 يوم',
@@ -61,6 +62,7 @@ class PlanSeeder extends Seeder
                 'max_cases'       => 200,
                 'max_storage_mb'  => 10240,
                 'ai_enabled'      => true,
+                'max_ai_requests_monthly' => 300,
                 'custom_branding' => false,
                 'features'        => [
                     'حتى 15 مستخدم',
@@ -82,6 +84,7 @@ class PlanSeeder extends Seeder
                 'max_cases'       => 9999,
                 'max_storage_mb'  => 102400,
                 'ai_enabled'      => true,
+                'max_ai_requests_monthly' => null, // unlimited
                 'custom_branding' => true,
                 'features'        => [
                     'مستخدمون وقضايا بلا حدود',

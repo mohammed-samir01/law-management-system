@@ -47,8 +47,13 @@ use App\Policies\PowerOfAttorneyPolicy;
 use App\Policies\SubscriptionPolicy;
 use App\Policies\SupportTicketPolicy;
 use App\Policies\UserPolicy;
+use App\Models\PlatformSetting;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -96,6 +101,62 @@ class AppServiceProvider extends ServiceProvider
                 return true;
             }
         });
+
+        $this->configureRateLimiters();
+        $this->applyDynamicMailConfig();
+    }
+
+    /**
+     * Named rate limiters — all read their limits from the dashboard-managed
+     * platform settings (with safe defaults).
+     */
+    private function configureRateLimiters(): void
+    {
+        $byUserOrIp = fn ($request) => optional($request->user())->id ?: $request->ip();
+
+        RateLimiter::for('login',    fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.login', 5))->by($r->ip()));
+        RateLimiter::for('register', fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.register', 3))->by($r->ip()));
+        RateLimiter::for('contact',  fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.contact', 5))->by($r->ip()));
+        RateLimiter::for('otp',      fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.otp', 3))->by($byUserOrIp($r)));
+        RateLimiter::for('uploads',  fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.uploads', 30))->by($byUserOrIp($r)));
+        RateLimiter::for('ai',       fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.ai', 20))->by($byUserOrIp($r)));
+        RateLimiter::for('api',      fn ($r) => Limit::perMinute((int) PlatformSetting::get('security.rate.api', 120))->by($byUserOrIp($r)));
+    }
+
+    /**
+     * Apply dashboard-managed SMTP settings at runtime (encrypted in DB),
+     * falling back to .env. Guarded so it never breaks artisan/migrate.
+     */
+    private function applyDynamicMailConfig(): void
+    {
+        try {
+            if (! Schema::hasTable('platform_settings')) {
+                return;
+            }
+
+            $mail = PlatformSetting::mail();
+            if (empty($mail) || empty($mail['host'])) {
+                return;
+            }
+
+            Config::set('mail.mailers.smtp', array_filter([
+                'transport'  => 'smtp',
+                'host'       => $mail['host'] ?? null,
+                'port'       => $mail['port'] ?? 587,
+                'username'   => $mail['username'] ?? null,
+                'password'   => $mail['password'] ?? null,
+                'encryption' => $mail['encryption'] ?? 'tls',
+            ], fn ($v) => $v !== null));
+
+            Config::set('mail.default', 'smtp');
+
+            if (! empty($mail['from_address'])) {
+                Config::set('mail.from.address', $mail['from_address']);
+                Config::set('mail.from.name', $mail['from_name'] ?? 'ميزان');
+            }
+        } catch (\Throwable) {
+            // Never break the app boot if settings are unavailable.
+        }
     }
 
     private function runMigrationsOnAndroid(): void

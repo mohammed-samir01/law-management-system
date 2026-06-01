@@ -23,7 +23,7 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
     // ─── Auth (guest) ──────────────────────────────────────────────────────────
     Route::middleware('guest')->group(function () {
         Route::get('login', [AuthController::class, 'showLogin'])->name('login');
-        Route::post('login', [AuthController::class, 'login'])->name('login.post');
+        Route::post('login', [AuthController::class, 'login'])->name('login.post')->middleware('throttle:login');
     });
 
     Route::post('logout', [AuthController::class, 'logout'])->name('logout')->middleware('auth');
@@ -36,7 +36,7 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
         Route::get('cases',       [LawyerCaseController::class, 'index'])->name('cases');
         Route::get('cases/{id}',  [LawyerCaseController::class, 'show'])->name('cases.show');
         Route::get('cases/{id}/documents',        [LawyerDocumentController::class, 'index'])->name('cases.documents');
-        Route::post('cases/{id}/documents/upload',[LawyerDocumentController::class, 'upload'])->name('cases.documents.upload');
+        Route::post('cases/{id}/documents/upload',[LawyerDocumentController::class, 'upload'])->middleware('throttle:uploads')->name('cases.documents.upload');
 
         Route::get('hearings',    [LawyerHearingController::class, 'index'])->name('hearings');
 

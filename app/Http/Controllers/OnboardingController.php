@@ -105,6 +105,13 @@ class OnboardingController extends Controller
 
         Auth::login($user);
 
+        // If email verification is enabled, send OTP and route to verification.
+        if (\App\Models\PlatformSetting::get('security.email_verification_enabled', false)) {
+            app(\App\Services\EmailVerificationService::class)->sendCode($user);
+
+            return redirect()->route('verification.notice');
+        }
+
         return redirect()->route('register.success');
     }
 

@@ -22,9 +22,10 @@ class CheckSubscription
             return $next($request);
         }
 
-        // Always allow billing + expired pages so the office can renew.
-        if ($request->routeIs('billing.*', 'subscription.expired')
-            || $request->is('admin/billing*', 'subscription/expired')) {
+        // Always allow billing + expired + email-verification pages so the
+        // office can renew and re-verify.
+        if ($request->routeIs('billing.*', 'subscription.expired', 'verification.*')
+            || $request->is('admin/billing*', 'subscription/expired', 'verify-email*')) {
             return $next($request);
         }
 

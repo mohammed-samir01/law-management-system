@@ -12,11 +12,12 @@ use OpenAI\Client;
 class AIService
 {
     private Client $client;
-    private string $model = 'gpt-4o';
+    private string $model;
 
     public function __construct()
     {
         $this->client = \OpenAI::client(config('services.openai.api_key', ''));
+        $this->model  = \App\Models\PlatformSetting::get('ai.model', config('services.openai.model', 'gpt-4o'));
     }
 
     public function summarizeDocument(Document $document, string $language = 'ar'): AIResult
@@ -97,6 +98,26 @@ class AIService
 
     private function run(string $prompt, string $resultType, Model $morphable, int $officeId): AIResult
     {
+        // Final safety guard — enforce plan AI-enabled + monthly quota even if
+        // a trigger bypassed the UI check. Records a failed result on breach.
+        $office = \App\Models\Office::withoutGlobalScopes()->find($officeId);
+        if ($office) {
+            try {
+                app(AIUsageService::class)->assertAllowed($office);
+            } catch (\Throwable $e) {
+                return AIResult::create([
+                    'office_id'   => $officeId,
+                    'model_type'  => get_class($morphable),
+                    'model_id'    => $morphable->getKey(),
+                    'result_type' => $resultType,
+                    'content'     => '⚠️ ' . $e->getMessage(),
+                    'model_used'  => $this->model,
+                    'tokens_used' => 0,
+                    'created_by'  => auth()->id(),
+                ]);
+            }
+        }
+
         try {
             $response = $this->client->chat()->create([
                 'model'    => $this->model,
@@ -104,8 +125,8 @@ class AIService
                     ['role' => 'system', 'content' => 'أنت مساعد قانوني متخصص يعمل لدى مكتب محاماة. اجب بدقة ومهنية.'],
                     ['role' => 'user', 'content' => $prompt],
                 ],
-                'max_tokens'  => 2000,
-                'temperature' => 0.3,
+                'max_tokens'  => (int) \App\Models\PlatformSetting::get('ai.max_tokens', 2000),
+                'temperature' => (float) \App\Models\PlatformSetting::get('ai.temperature', 0.3),
             ]);
 
             $content    = $response->choices[0]->message->content;

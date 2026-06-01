@@ -223,6 +223,7 @@ class LegalCaseResource extends Resource
                         ->color('info')
                         ->requiresConfirmation()
                         ->action(function (LegalCase $record) {
+                            if (! \App\Filament\Resources\DocumentResource::guardAi()) return;
                             AIProcessJob::dispatch($record, 'summarize_case', 'ar', auth()->id());
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),
@@ -233,6 +234,7 @@ class LegalCaseResource extends Resource
                         ->color('warning')
                         ->requiresConfirmation()
                         ->action(function (LegalCase $record) {
+                            if (! \App\Filament\Resources\DocumentResource::guardAi()) return;
                             AIProcessJob::dispatch($record, 'suggest_strategy', 'ar', auth()->id());
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),

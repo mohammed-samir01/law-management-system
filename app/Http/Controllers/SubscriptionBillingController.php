@@ -147,7 +147,10 @@ class SubscriptionBillingController extends Controller
 
     private function activate(Subscription $subscription, SubscriptionPayment $payment, array $data): void
     {
-        DB::transaction(function () use ($subscription, $payment, $data) {
+        // Was the office suspended (not usable) before this payment?
+        $wasSuspended = ! $subscription->isUsable();
+
+        DB::transaction(function () use ($subscription, $payment, $data, $wasSuspended) {
             $payment->update([
                 'status'                 => 'completed',
                 'gateway_transaction_id' => $data['transaction_id'] ?? $payment->gateway_transaction_id,
@@ -164,6 +167,11 @@ class SubscriptionBillingController extends Controller
                 'current_period_start' => now(),
                 'current_period_end'   => $end,
             ]);
+
+            // Reactivating from suspension → force email re-verification (if enabled).
+            if ($wasSuspended) {
+                \App\Services\SubscriptionReactivation::forceReVerify($subscription->office_id);
+            }
         });
     }
 }

@@ -87,6 +87,7 @@ class ExpenseResource extends Resource
                             ->disk('public')
                             ->directory('receipts')
                             ->acceptedFileTypes(['image/*', 'application/pdf'])
+                            ->maxSize(fn () => \App\Models\PlatformSetting::get('media.max_upload_kb', 5120))
                             ->nullable(),
                     ])->columns(2),
             ]);
