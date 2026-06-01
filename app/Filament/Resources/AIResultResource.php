@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class AIResultResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = AIResult::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-cpu-chip';

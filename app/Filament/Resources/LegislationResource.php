@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LegislationResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Legislation::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-book-open';

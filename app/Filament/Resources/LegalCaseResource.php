@@ -18,6 +18,8 @@ use Illuminate\Support\Str;
 
 class LegalCaseResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = LegalCase::class;
     protected static ?string $navigationIcon = 'heroicon-o-scale';
     protected static ?string $navigationGroup = 'القضايا';

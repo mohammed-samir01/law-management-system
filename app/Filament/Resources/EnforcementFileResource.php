@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class EnforcementFileResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = EnforcementFile::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-scale';

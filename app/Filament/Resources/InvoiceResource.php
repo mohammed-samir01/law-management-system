@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class InvoiceResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Invoice::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-text';

@@ -12,6 +12,8 @@ use Filament\Tables\Table;
 
 class ClientResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Client::class;
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
     protected static ?string $navigationGroup = 'العملاء';

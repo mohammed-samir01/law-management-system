@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class ExpenseResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Expense::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';

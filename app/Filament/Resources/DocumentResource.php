@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class DocumentResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Document::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';

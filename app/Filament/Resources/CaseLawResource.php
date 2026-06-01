@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class CaseLawResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = CaseLaw::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-document-magnifying-glass';

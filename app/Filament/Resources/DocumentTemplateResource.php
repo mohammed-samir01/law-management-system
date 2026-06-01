@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class DocumentTemplateResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = DocumentTemplate::class;
     protected static ?string $navigationIcon = 'heroicon-o-document-duplicate';
     protected static ?string $navigationGroup = 'الوثائق';

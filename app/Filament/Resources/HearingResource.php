@@ -13,6 +13,8 @@ use Filament\Tables\Table;
 
 class HearingResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = Hearing::class;
     protected static ?string $navigationIcon = 'heroicon-o-calendar-days';
     protected static ?string $navigationGroup = 'القضايا';

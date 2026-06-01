@@ -13,6 +13,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class PaymentGatewayResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = PaymentGateway::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-building-library';

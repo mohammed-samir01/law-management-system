@@ -16,6 +16,8 @@ use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class PowerOfAttorneyResource extends Resource
 {
+    use \App\Filament\Concerns\OfficeOnlyResource;
+
     protected static ?string $model = PowerOfAttorney::class;
 
     protected static ?string $navigationIcon  = 'heroicon-o-identification';
