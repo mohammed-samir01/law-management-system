@@ -25,7 +25,7 @@ class HearingReminderNotification extends Notification implements ShouldQueue
         $case = $this->hearing->legalCase;
 
         return [
-            'title' => 'تذكير بجلسة — ' . ($case?->case_number ?? 'عامر'),
+            'title' => 'تذكير بجلسة — ' . ($case?->case_number ?? 'ميزان'),
             'body'  => 'جلسة القضية ' . ($case?->case_number ?? '') . ' — ' . $this->hearing->scheduled_at?->format('Y/m/d H:i'),
             'data'  => [
                 'type'       => 'hearing_reminder',

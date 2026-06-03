@@ -57,7 +57,7 @@ class LandingSettingsPage extends Page
     public function form(Form $form): Form
     {
         $iconOptions = [
-            'scale'     => '⚖️ عامر — قضايا مدنية',
+            'scale'     => '⚖️ ميزان — قضايا مدنية',
             'building'  => '🏢 مبنى — قانون تجاري',
             'users'     => '👥 أشخاص — قضايا أسرة',
             'shield'    => '🛡️ درع — قضايا جنائية',
@@ -512,7 +512,7 @@ class LandingSettingsPage extends Page
                                     ->content(new \Illuminate\Support\HtmlString(
                                         '<div class="rounded-xl border border-blue-100 bg-blue-50 dark:bg-blue-950 dark:border-blue-800 px-5 py-4">'
                                         . '<p class="font-semibold text-blue-800 dark:text-blue-300 text-base">🌐 اربط دومينك الخاص بصفحة مكتبك</p>'
-                                        . '<p class="text-sm text-blue-700 dark:text-blue-400 mt-1">بدلاً من أن يزور عملاؤك رابطاً طويلاً على ميزان، يمكنهم الوصول لصفحتك مباشرةً عبر دومينك — مثل <span dir="ltr" class="font-mono">www.amer-law.com</span> — بدون أي تغيير في الرابط.</p>'
+                                        . '<p class="text-sm text-blue-700 dark:text-blue-400 mt-1">بدلاً من أن يزور عملاؤك رابطاً طويلاً على ميزان، يمكنهم الوصول لصفحتك مباشرةً عبر دومينك — مثل <span dir="ltr" class="font-mono">www.mizan-law.com</span> — بدون أي تغيير في الرابط.</p>'
                                         . '</div>'
                                     ))
                                     ->columnSpanFull(),
@@ -533,8 +533,8 @@ class LandingSettingsPage extends Page
 
                                         Forms\Components\TextInput::make('_custom_domain_display')
                                             ->label('الدومين المخصص')
-                                            ->placeholder('www.amer-law.com')
-                                            ->helperText('اكتب الدومين بدون https:// — مثال: www.amer-law.com أو amer-law.com')
+                                            ->placeholder('www.mizan-law.com')
+                                            ->helperText('اكتب الدومين بدون https:// — مثال: www.mizan-law.com أو mizan-law.com')
                                             ->extraInputAttributes(['dir' => 'ltr', 'class' => 'font-mono'])
                                             ->default(fn () => $this->customDomain)
                                             ->live()

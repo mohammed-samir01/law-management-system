@@ -6,7 +6,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>@yield('title', 'عامر — إدارة مكاتب المحاماة')</title>
+    <title>@yield('title', 'ميزان — إدارة مكاتب المحاماة')</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>
         if (localStorage.getItem('amer_theme') === 'dark') document.documentElement.classList.add('dark');
@@ -33,7 +33,7 @@
                     <span class="text-white font-bold text-sm">ع</span>
                 </div>
                 <div>
-                    <p class="text-white font-bold text-base leading-none">عامر</p>
+                    <p class="text-white font-bold text-base leading-none">ميزان</p>
                     <p class="text-white/50 text-xs mt-0.5">إدارة مكاتب المحاماة</p>
                 </div>
             </div>

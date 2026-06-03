@@ -26,7 +26,7 @@ class AiHearingReminderNotification extends Notification implements ShouldQueue
     public function toPush(object $notifiable): array
     {
         return [
-            'title' => 'تذكير بجلسة — ' . ($this->hearing->legalCase?->case_number ?? 'عامر'),
+            'title' => 'تذكير بجلسة — ' . ($this->hearing->legalCase?->case_number ?? 'ميزان'),
             'body'  => $this->message,
             'data'  => [
                 'type'       => 'ai_hearing_reminder',

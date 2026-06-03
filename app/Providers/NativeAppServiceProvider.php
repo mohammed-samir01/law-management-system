@@ -16,18 +16,18 @@ class NativeAppServiceProvider implements ProvidesPhpIni
             ->height(820)
             ->minWidth(900)
             ->minHeight(600)
-            ->title('عامر — إدارة مكاتب المحاماة')
+            ->title('ميزان — إدارة مكاتب المحاماة')
             ->route('desktop.dashboard');
 
         MenuBar::create()
-            ->tooltip('عامر')
+            ->tooltip('ميزان')
             ->contextMenu(
                 Menu::make(
                     Menu::link(route('desktop.dashboard'), 'لوحة التحكم'),
                     Menu::link(route('desktop.cases'),     'القضايا'),
                     Menu::link(route('desktop.calendar'),  'الجلسات'),
                     Menu::separator(),
-                    Menu::label(auth()->user()?->name ?? 'عامر'),
+                    Menu::label(auth()->user()?->name ?? 'ميزان'),
                 )
             );
     }

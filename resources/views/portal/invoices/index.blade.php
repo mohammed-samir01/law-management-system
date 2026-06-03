@@ -63,7 +63,7 @@
             </svg>
         </div>
         <div>
-            <div class="logo-text">عامر</div>
+            <div class="logo-text">ميزان</div>
             <div class="logo-sub">بوابة العميل</div>
         </div>
     </div>

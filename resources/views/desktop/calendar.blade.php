@@ -1,5 +1,5 @@
 ﻿@extends('desktop.layouts.app')
-@section('title', 'الجلسات — عامر')
+@section('title', 'الجلسات — ميزان')
 @section('page-title', 'تقويم الجلسات')
 
 @section('content')

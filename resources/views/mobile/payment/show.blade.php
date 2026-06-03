@@ -1,6 +1,6 @@
 @extends('mobile.layouts.app')
 
-@section('title', 'الدفع — عامر')
+@section('title', 'الدفع — ميزان')
 
 @section('header')
 @section('header-title', 'دفع الفاتورة')

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>تسجيل الدخول — عامر</title>
+    <title>تسجيل الدخول — ميزان</title>
     <script>if(localStorage.getItem('amer_theme')==='dark')document.documentElement.classList.add('dark');</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <style>
@@ -22,7 +22,7 @@
                     <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
                 </svg>
             </div>
-            <h1 class="text-3xl font-bold text-white">عامر</h1>
+            <h1 class="text-3xl font-bold text-white">ميزان</h1>
             <p class="text-[#C9A84C] text-sm mt-1">نظام إدارة مكتب المحاماة</p>
         </div>
 
@@ -91,7 +91,7 @@
     </div>
 
     <div class="text-center text-[#C9A84C] text-xs pb-6 safe-bottom mt-4">
-        عامر © {{ date('Y') }}
+        ميزان © {{ date('Y') }}
     </div>
 
 </body>

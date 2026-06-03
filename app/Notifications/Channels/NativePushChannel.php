@@ -41,7 +41,7 @@ class NativePushChannel
             foreach ($tokens as $token) {
                 $message = CloudMessage::withTarget('token', $token)
                     ->withNotification(FcmNotification::create(
-                        $payload['title'] ?? 'عامر',
+                        $payload['title'] ?? 'ميزان',
                         $payload['body'] ?? ''
                     ))
                     ->withData($payload['data'] ?? []);

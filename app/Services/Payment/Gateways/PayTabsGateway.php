@@ -19,7 +19,7 @@ class PayTabsGateway extends AbstractGateway
                 'profile_id'    => $this->config['profile_id'],
                 'tran_type'     => 'sale',
                 'tran_class'    => 'ecom',
-                'cart_id'       => $data['reference'] ?? uniqid('amer_'),
+                'cart_id'       => $data['reference'] ?? uniqid('mizan_'),
                 'cart_currency' => $data['currency'] ?? 'SAR',
                 'cart_amount'   => $data['amount'],
                 'cart_description' => $data['description'] ?? 'Invoice payment',
@@ -27,7 +27,7 @@ class PayTabsGateway extends AbstractGateway
                 'callback'      => $data['callback_url'] ?? config('app.url').'/payments/webhook/paytabs',
                 'customer_details' => [
                     'name'  => $data['customer_name'] ?? 'Client',
-                    'email' => $data['email'] ?? 'client@amer.test',
+                    'email' => $data['email'] ?? 'client@mizan.test',
                     'phone' => $data['phone'] ?? '',
                     'street1' => $data['address'] ?? 'N/A',
                     'city'  => $data['city'] ?? 'Riyadh',

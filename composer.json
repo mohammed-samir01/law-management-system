@@ -1,8 +1,8 @@
 {
     "$schema": "https://getcomposer.org/schema.json",
-    "name": "amer/legal",
+    "name": "mizan/legal",
     "type": "project",
-    "description": "Amer — Law Office Management System (Laravel 12 + Filament 3)",
+    "description": "Mizan — Law Office Management System (Laravel 12 + Filament 3)",
     "keywords": ["laravel", "law", "legal", "filament", "arabic"],
     "license": "proprietary",
     "require": {

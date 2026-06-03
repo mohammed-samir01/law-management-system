@@ -113,7 +113,7 @@ class PaymobGateway extends AbstractGateway
             'integration_id' => $this->config['integration_id'],
             'billing_data'   => [
                 'apartment'     => 'N/A',
-                'email'         => $data['email'] ?? 'client@amer.test',
+                'email'         => $data['email'] ?? 'client@mizan.test',
                 'floor'         => 'N/A',
                 'first_name'    => $data['first_name'] ?? 'Client',
                 'street'        => 'N/A',

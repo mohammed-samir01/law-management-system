@@ -1,9 +1,9 @@
 ﻿@extends('mobile.layouts.app')
 
-@section('title', 'الرئيسية — عامر')
+@section('title', 'الرئيسية — ميزان')
 
 @section('header')
-@section('header-title', 'عامر')
+@section('header-title', 'ميزان')
 @section('header-left')
 <a href="{{ route('mobile.logout') }}"
    onclick="event.preventDefault(); document.getElementById('logout-form').submit();"

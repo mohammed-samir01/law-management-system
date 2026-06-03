@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول — عامر</title>
+    <title>تسجيل الدخول — ميزان</title>
     @vite(['resources/css/app.css', 'resources/js/app.js'])
     <script>if(localStorage.getItem('amer_theme')==='dark')document.documentElement.classList.add('dark');</script>
 </head>
@@ -16,7 +16,7 @@
             <div class="w-16 h-16 bg-[#C9A84C] rounded-2xl flex items-center justify-center mx-auto mb-4 shadow-lg">
                 <span class="text-white font-bold text-3xl">ع</span>
             </div>
-            <h1 class="text-white font-bold text-2xl">عامر</h1>
+            <h1 class="text-white font-bold text-2xl">ميزان</h1>
             <p class="text-white/60 text-sm mt-1">إدارة مكاتب المحاماة</p>
         </div>
 
@@ -35,7 +35,7 @@
                            class="w-full border {{ $errors->has('email') ? 'border-red-400' : 'border-gray-200 dark:border-gray-600' }}
                                   bg-white dark:bg-gray-700 text-gray-800 dark:text-gray-100
                                   rounded-xl px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-[#1E3A5F]"
-                           placeholder="admin@amer.test">
+                           placeholder="admin@mizan.test">
                     @error('email')
                     <p class="text-red-500 text-xs mt-1">{{ $message }}</p>
                     @enderror
@@ -66,7 +66,7 @@
             </form>
         </div>
 
-        <p class="text-white/40 text-xs text-center mt-6">عامر v{{ config('nativephp.version', '1.0.0') }}</p>
+        <p class="text-white/40 text-xs text-center mt-6">ميزان v{{ config('nativephp.version', '1.0.0') }}</p>
     </div>
 
 </body>

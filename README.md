@@ -1,5 +1,5 @@
-# عامر — نظام إدارة مكاتب المحاماة
-# Amer — Law Office Management System
+# ميزان — نظام إدارة مكاتب المحاماة
+# Mizan — Law Office Management System
 
 نظام متكامل لإدارة مكاتب المحاماة مبني على Laravel 12 + Filament 3، يدعم اللغتين العربية والإنجليزية.
 
@@ -13,7 +13,7 @@
 | PHP | 8.2+ |
 | Filament Admin | 3.x |
 | Database | MySQL 8.0 |
-| Queue / Cache | Redis |
+| Queue / Cache | Database (Redis اختياري) |
 | Frontend | Tailwind CSS v4 + Alpine.js |
 
 ---
@@ -38,7 +38,7 @@
 ### Requirements
 - PHP 8.2+
 - MySQL 8.0+
-- Redis
+- Redis (اختياري — الافتراضي queue/cache على قاعدة البيانات)
 - Node.js 20+
 - Composer 2.x
 
@@ -46,8 +46,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/amer-legal.git
-cd amer-legal
+git clone https://github.com/YOUR_USERNAME/mizan-legal.git
+cd mizan-legal
 
 # 2. Install PHP dependencies
 composer install --no-dev --optimize-autoloader
@@ -85,11 +85,11 @@ After running `php artisan db:seed`:
 
 | Role | Email | Password |
 |---|---|---|
-| Super Admin | super@amer.test | password |
-| Office Admin | admin@amer.test | password |
-| Lawyer | lawyer1@amer.test | password |
-| Assistant | assistant@amer.test | password |
-| Client | client@amer.test | password |
+| Super Admin | super@mizan.test | password |
+| Office Admin | admin@mizan.test | password |
+| Lawyer | lawyer1@mizan.test | password |
+| Assistant | assistant@mizan.test | password |
+| Client | client@mizan.test | password |
 
 ---
 
@@ -102,7 +102,7 @@ php artisan queue:work --tries=3 --timeout=90
 Use **Supervisor** to keep the queue running:
 
 ```ini
-[program:amer-queue]
+[program:mizan-queue]
 command=php /path/to/project/artisan queue:work database --tries=3
 autostart=true
 autorestart=true

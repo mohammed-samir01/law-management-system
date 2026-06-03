@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1E3A5F">
-    <title>@yield('title', 'عامر')</title>
+    <title>@yield('title', 'ميزان')</title>
 
     @if(auth()->check() && auth()->user()->hasAnyRole(['lawyer', 'office_admin']) && auth()->user()->office?->hasAddon('lawyer-pwa'))
     {{-- Lawyer PWA (lawyer-pwa addon) --}}
@@ -54,7 +54,7 @@
     <header class="bg-[#1E3A5F] text-white safe-top sticky top-0 z-40 shadow-md">
         <div class="flex items-center justify-between px-4 py-3">
             @yield('header-right')
-            <h1 class="text-lg font-bold">@yield('header-title', 'عامر')</h1>
+            <h1 class="text-lg font-bold">@yield('header-title', 'ميزان')</h1>
             <div class="flex items-center gap-1">
                 @yield('header-left')
                 {{-- Dark mode toggle --}}

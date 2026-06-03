@@ -1,8 +1,8 @@
 {
   "info": {
-    "_postman_id": "amer-api-collection-v1",
-    "name": "Amer API — v1",
-    "description": "مجموعة كاملة لـ API نظام عامر لإدارة مكتب المحاماة.\n\n**كيفية الاستخدام:**\n1. استورد ملف `amer-environment.json` كـ Environment\n2. شغّل `POST Login` أولاً — سيُحفظ الـ token تلقائياً\n3. جميع الطلبات الأخرى ستستخدم الـ token المحفوظ\n\n**المستخدمون التجريبيون:**\n- admin@amer.test / password (office_admin)\n- lawyer1@amer.test / password (lawyer)\n- client@amer.test / password (client)",
+    "_postman_id": "mizan-api-collection-v1",
+    "name": "Mizan API — v1",
+    "description": "مجموعة كاملة لـ API نظام ميزان لإدارة مكتب المحاماة.\n\n**كيفية الاستخدام:**\n1. استورد ملف `mizan-environment.json` كـ Environment\n2. شغّل `POST Login` أولاً — سيُحفظ الـ token تلقائياً\n3. جميع الطلبات الأخرى ستستخدم الـ token المحفوظ\n\n**المستخدمون التجريبيون:**\n- admin@mizan.test / password (office_admin)\n- lawyer1@mizan.test / password (lawyer)\n- client@mizan.test / password (client)",
     "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
   },
   "variable": [],

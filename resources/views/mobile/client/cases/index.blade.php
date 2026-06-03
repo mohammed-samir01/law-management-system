@@ -1,6 +1,6 @@
 ﻿@extends('mobile.layouts.app')
 
-@section('title', 'قضاياي — عامر')
+@section('title', 'قضاياي — ميزان')
 
 @section('header')
 @section('header-title', 'قضاياي')

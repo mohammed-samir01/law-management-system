@@ -1,5 +1,5 @@
 ﻿@extends('desktop.layouts.app')
-@section('title', 'تفاصيل القضية — عامر')
+@section('title', 'تفاصيل القضية — ميزان')
 @section('page-title', $case->case_number . ' — ' . $case->getTranslation('title','ar',false))
 
 @section('content')

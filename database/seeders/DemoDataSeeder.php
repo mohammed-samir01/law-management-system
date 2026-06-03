@@ -58,15 +58,15 @@ class DemoDataSeeder extends Seeder
     private function createOffice(): Office
     {
         return Office::create([
-            'name'     => ['ar' => 'مكتب عامر للمحاماة', 'en' => 'Amer Law Office'],
-            'slug'     => 'amer',
+            'name'     => ['ar' => 'مكتب ميزان للمحاماة', 'en' => 'Mizan Law Office'],
+            'slug'     => 'mizan',
             'phone'    => '+20 127 496 9862',
             'email'    => 'amerm5798@gmail.com',
             'address'  => ['street' => 'الطيبة', 'city' => 'الزقازيق', 'governorate' => 'الشرقية', 'country' => 'مصر'],
             'settings' => [
                 'branding' => [
-                    'name_ar'       => 'مكتب عامر للمحاماة',
-                    'name_en'       => 'Amer Law Office',
+                    'name_ar'       => 'مكتب ميزان للمحاماة',
+                    'name_en'       => 'Mizan Law Office',
                     'logo_path'     => null,
                     'primary_color' => '#1E3A5F',
                     'accent_color'  => '#C9A84C',
@@ -75,8 +75,8 @@ class DemoDataSeeder extends Seeder
                     'image_path'        => '/images/hero-default.webp',
                     'heading_ar'        => 'نُحقِّق العدالة بكل احترافية',
                     'heading_en'        => 'Justice Delivered with Excellence',
-                    'subtitle_ar'       => 'مكتب عامر للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة',
-                    'subtitle_en'       => 'Amer Law Office — expert lawyers delivering comprehensive legal services in civil, commercial, criminal, and family law',
+                    'subtitle_ar'       => 'مكتب ميزان للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة',
+                    'subtitle_en'       => 'Mizan Law Office — expert lawyers delivering comprehensive legal services in civil, commercial, criminal, and family law',
                     'founded_year'      => '1995',
                     'stat_cases'        => 500,
                     'stat_years'        => 25,
@@ -99,8 +99,8 @@ class DemoDataSeeder extends Seeder
                     'tiktok'           => null,
                 ],
                 'seo' => [
-                    'meta_title'       => 'مكتب عامر للمحاماة',
-                    'meta_description' => 'مكتب عامر للمحاماة — خدمات قانونية متكاملة في مصر | الشرقية — الزقازيق',
+                    'meta_title'       => 'مكتب ميزان للمحاماة',
+                    'meta_description' => 'مكتب ميزان للمحاماة — خدمات قانونية متكاملة في مصر | الشرقية — الزقازيق',
                     'meta_keywords'    => 'محامي، مكتب محاماة، قانون، قضايا، مصر، الشرقية، الزقازيق',
                     'og_image_path'    => null,
                 ],
@@ -114,7 +114,7 @@ class DemoDataSeeder extends Seeder
         // Platform owner — NOT tied to any office (manages the whole platform).
         $super = User::create([
             'name'      => 'Super Admin',
-            'email'     => 'super@amer.test',
+            'email'     => 'super@mizan.test',
             'password'  => Hash::make('password'),
             'office_id' => null,
             'is_active' => true,
@@ -124,7 +124,7 @@ class DemoDataSeeder extends Seeder
 
         $admin = User::create([
             'name'      => 'مدير المكتب',
-            'email'     => 'admin@amer.test',
+            'email'     => 'admin@mizan.test',
             'password'  => Hash::make('password'),
             'office_id' => $office->id,
             'is_active' => true,
@@ -134,7 +134,7 @@ class DemoDataSeeder extends Seeder
 
         $lawyer1 = User::create([
             'name'      => 'المحامي أحمد',
-            'email'     => 'lawyer1@amer.test',
+            'email'     => 'lawyer1@mizan.test',
             'password'  => Hash::make('password'),
             'office_id' => $office->id,
             'is_active' => true,
@@ -144,7 +144,7 @@ class DemoDataSeeder extends Seeder
 
         $assistant = User::create([
             'name'      => 'المساعد محمد',
-            'email'     => 'assistant@amer.test',
+            'email'     => 'assistant@mizan.test',
             'password'  => Hash::make('password'),
             'office_id' => $office->id,
             'is_active' => true,
@@ -154,7 +154,7 @@ class DemoDataSeeder extends Seeder
 
         $client = User::create([
             'name'      => 'عميل - خالد',
-            'email'     => 'client@amer.test',
+            'email'     => 'client@mizan.test',
             'password'  => Hash::make('password'),
             'office_id' => $office->id,
             'is_active' => true,
@@ -186,8 +186,8 @@ class DemoDataSeeder extends Seeder
             ]));
         }
 
-        // Link the portal client user (client@amer.test) to "خالد" client record
-        $clientUser = \App\Models\User::where('email', 'client@amer.test')->first();
+        // Link the portal client user (client@mizan.test) to "خالد" client record
+        $clientUser = \App\Models\User::where('email', 'client@mizan.test')->first();
         if ($clientUser) {
             $clients[0]->update(['user_id' => $clientUser->id]);
         }

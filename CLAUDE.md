@@ -1,10 +1,10 @@
-# CLAUDE.md — Amer Law Office Management System
+# CLAUDE.md — Mizan Law Office Management System
 
 ## 🎯 Project Identity
 
 | Key | Value |
 |-----|-------|
-| Project Name | **Amer** (عامر) — Law Office Management System |
+| Project Name | **Mizan** (ميزان) — Law Office Management System |
 | Laravel Version | **12.x** (PHP 8.2+) |
 | Admin Panel | **Filament 3.x** |
 | Database | **MySQL 8.0** |
@@ -403,4 +403,4 @@ Before moving to next module, verify:
 
 ---
 
-*CLAUDE.md — Amer v1.0 | Laravel 12 + Filament 3 | AR+EN*
+*CLAUDE.md — Mizan v1.0 | Laravel 12 + Filament 3 | AR+EN*
