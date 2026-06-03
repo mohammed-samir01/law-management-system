@@ -25,6 +25,10 @@ class EmailVerificationController extends Controller
         $user = auth()->user();
 
         if ($service->verify($user, $request->code)) {
+            if (session()->pull('needs_profile_setup')) {
+                return redirect()->route('register.profile')->with('success', 'تم تفعيل بريدك بنجاح.');
+            }
+
             return redirect()->intended('/admin')->with('success', 'تم تفعيل بريدك بنجاح.');
         }
 

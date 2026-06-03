@@ -118,6 +118,7 @@ class ExpenseResource extends Resource
                 Tables\Columns\TextColumn::make('amount')
                     ->label('المبلغ')
                     ->money(fn ($record) => $record->currency)
+                    ->visible(fn () => \App\Support\FieldAccess::financials())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')

@@ -10,7 +10,7 @@ class LandingController extends Controller
 {
     public function index()
     {
-        $office   = Office::withoutGlobalScopes()->where('is_active', true)->first();
+        $office   = Office::withoutGlobalScopes()->whereNull('deleted_at')->where('is_active', true)->first();
         $settings = array_replace_recursive($this->getDefaultSettings(), $office?->settings ?? []);
         $officeSlug = $office?->slug;
 
@@ -20,14 +20,55 @@ class LandingController extends Controller
     public function office(string $slug)
     {
         $office = Office::withoutGlobalScopes()
+            ->whereNull('deleted_at')
             ->where('slug', $slug)
             ->where('is_active', true)
             ->firstOrFail();
 
-        $settings   = array_replace_recursive($this->getDefaultSettings(), $office->settings ?? []);
-        $officeSlug = $office->slug;
+        return $this->renderForOffice($office);
+    }
 
-        return view('landing.index', compact('settings', 'officeSlug'));
+    /**
+     * Build and return the office landing page response.
+     * Called by both the slug route and the HandleCustomDomain middleware.
+     */
+    public function renderForOffice(Office $office): \Illuminate\Http\Response
+    {
+        $officeName = $office->getTranslation('name', app()->getLocale())
+            ?: $office->getTranslation('name', 'ar')
+            ?: $office->getTranslation('name', 'en')
+            ?: $office->slug;
+
+        $officeDefaults = array_replace_recursive($this->getDefaultSettings(), [
+            'branding' => [
+                'name_ar' => $officeName,
+                'name_en' => $office->getTranslation('name', 'en') ?: $officeName,
+            ],
+            'hero'    => [
+                'heading_ar'  => 'نُحقِّق العدالة بكل احترافية',
+                'heading_en'  => 'Justice Delivered with Excellence',
+                'subtitle_ar' => '',
+                'subtitle_en' => '',
+                'founded_year'=> null,
+            ],
+            'contact' => array_filter([
+                'phone'      => $office->phone,
+                'email'      => $office->email,
+                'address_ar' => data_get($office->address, 'street'),
+            ]),
+            'seo' => [
+                'meta_title' => $officeName,
+            ],
+        ]);
+
+        $settings   = array_replace_recursive($officeDefaults, $office->settings ?? []);
+        $officeSlug = $office->slug;
+        $developer  = [
+            'name'     => \App\Models\PlatformSetting::get('developer.name', 'Mohamed Shahin'),
+            'linkedin' => \App\Models\PlatformSetting::get('developer.linkedin', ''),
+        ];
+
+        return response(view('landing.index', compact('settings', 'officeSlug', 'developer')));
     }
 
     public function contact(Request $request)
@@ -67,13 +108,26 @@ class LandingController extends Controller
         ]);
     }
 
+    public function sitemap(string $slug)
+    {
+        $office = Office::withoutGlobalScopes()
+            ->where('slug', $slug)
+            ->where('is_active', true)
+            ->whereNull('deleted_at')
+            ->firstOrFail();
+
+        $content = view('seo.sitemap-office', compact('office'))->render();
+
+        return response($content, 200)->header('Content-Type', 'application/xml');
+    }
+
     public function getDefaultSettings(): array
     {
         return [
             'seo' => [
                 'meta_title'       => null,
-                'meta_description' => 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية',
-                'meta_keywords'    => 'محامي، مكتب محاماة، قانون، قضايا، مصر',
+                'meta_description' => 'مكتب محاماة — خدمات قانونية متكاملة',
+                'meta_keywords'    => 'محامي، مكتب محاماة، قانون، قضايا',
                 'og_image_path'    => null,
             ],
             'branding' => [
@@ -82,12 +136,12 @@ class LandingController extends Controller
                 'accent_color'  => '#C9A84C',
             ],
             'hero' => [
-                'image_path'       => '/images/hero-default.webp',
-                'heading_ar'       => 'نُحقِّق العدالة بكل احترافية',
-                'heading_en'       => 'Justice Delivered with Excellence',
-                'subtitle_ar'      => 'مكتب عامر للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة',
-                'subtitle_en'      => 'Amer Law Office — a team of expert lawyers delivering comprehensive legal services in civil, commercial, criminal, and family law',
-                'founded_year'     => '1995',
+                'image_path'       => null,
+                'heading_ar'       => 'مكتب محاماة',
+                'heading_en'       => 'Law Office',
+                'subtitle_ar'      => '',
+                'subtitle_en'      => '',
+                'founded_year'     => null,
                 'stat_cases'       => 500,
                 'stat_years'       => 25,
                 'stat_satisfaction'=> 98,
@@ -123,12 +177,12 @@ class LandingController extends Controller
                 ['icon' => 'clock',     'title_ar' => 'متاحون دائماً', 'title_en' => 'Always Available',         'desc_ar' => 'نوفر بوابة إلكترونية متكاملة تتيح لك متابعة قضيتك والتواصل مع فريقك القانوني في أي وقت وأي مكان',                      'desc_en' => 'Our integrated client portal lets you track your case and communicate with your legal team anytime, anywhere'],
             ],
             'contact' => [
-                'phone'            => '+20 127 496 9862',
-                'phone2'           => '+20 100 954 5140',
-                'email'            => 'amerm5798@gmail.com',
-                'whatsapp'         => '201274969862',
-                'address_ar'       => 'مصر — الشرقية — الزقازيق',
-                'address_en'       => 'Egypt — El-Sharqia — Zagazig',
+                'phone'            => null,
+                'phone2'           => null,
+                'email'            => null,
+                'whatsapp'         => null,
+                'address_ar'       => null,
+                'address_en'       => null,
                 'working_hours_ar' => 'الأحد — الخميس: ٩ ص — ٥ م',
                 'working_hours_en' => 'Sunday — Thursday: 9 AM — 5 PM',
                 'facebook'         => null,

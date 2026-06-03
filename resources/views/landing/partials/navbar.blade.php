@@ -14,7 +14,7 @@
                     ? (str_starts_with($_navLogoPath, 'http') ? $_navLogoPath : asset('storage/' . $_navLogoPath))
                     : null;
             @endphp
-            <a href="{{ route('home') }}" class="flex items-center gap-2 flex-shrink-0">
+            <a href="#hero" class="flex items-center gap-2 flex-shrink-0">
                 @if($_navLogoUrl)
                     <img src="{{ $_navLogoUrl }}" alt="logo" class="h-9 w-auto object-contain">
                 @else
@@ -30,7 +30,7 @@
                 @endif
                 <span
                     class="text-white font-bold text-xl transition-colors duration-300"
-                    x-text="lang === 'ar' ? 'عامر' : 'Amer'"
+                    x-text="lang === 'ar' ? (window.officeName?.ar || 'المكتب') : (window.officeName?.en || 'Office')"
                 ></span>
             </a>
 
@@ -38,9 +38,9 @@
             <div class="hidden lg:flex items-center gap-8">
                 <template x-if="lang === 'ar'">
                     <div class="flex items-center gap-8">
-                        <a href="{{ route('home') }}" class="text-sm font-medium text-gold transition-colors">الرئيسية</a>
+                        <a href="#hero" class="text-sm font-medium text-gold transition-colors">الرئيسية</a>
                         <a href="#services"      class="text-sm font-medium text-gray-200 hover:text-gold transition-colors">خدماتنا</a>
-                        <a href="#why-us"        class="text-sm font-medium text-gray-200 hover:text-gold transition-colors">لماذا عامر</a>
+                        <a href="#why-us"        class="text-sm font-medium text-gray-200 hover:text-gold transition-colors" x-text="'لماذا ' + (window.officeName?.ar || 'نحن')"></a>
                         <a href="#team"          class="text-sm font-medium text-gray-200 hover:text-gold transition-colors">فريقنا</a>
                         <a href="#testimonials"  class="text-sm font-medium text-gray-200 hover:text-gold transition-colors">آراء العملاء</a>
                         <a href="#contact"       class="text-sm font-medium text-gray-200 hover:text-gold transition-colors">تواصل معنا</a>
@@ -117,9 +117,9 @@
         class="lg:hidden bg-navy/97 backdrop-blur-md border-t border-white/10"
     >
         <div class="px-4 py-4 space-y-2">
-            <a href="{{ route('home') }}" @click="open=false" class="block py-2 px-3 text-gold hover:bg-white/5 rounded-lg transition-colors font-medium" x-text="lang==='ar'?'الرئيسية':'Home'"></a>
+            <a href="#hero" @click="open=false" class="block py-2 px-3 text-gold hover:bg-white/5 rounded-lg transition-colors font-medium" x-text="lang==='ar'?'الرئيسية':'Home'"></a>
             <a href="#services"     @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar'?'خدماتنا':'Services'"></a>
-            <a href="#why-us"       @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar'?'لماذا عامر':'Why Us'"></a>
+            <a href="#why-us"       @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar' ? 'لماذا ' + (window.officeName?.ar || 'نحن') : 'Why Us'"></a>
             <a href="#team"         @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar'?'فريقنا':'Team'"></a>
             <a href="#testimonials" @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar'?'آراء العملاء':'Testimonials'"></a>
             <a href="#contact"      @click="open=false" class="block py-2 px-3 text-gray-200 hover:text-gold hover:bg-white/5 rounded-lg transition-colors" x-text="lang==='ar'?'تواصل معنا':'Contact'"></a>

@@ -62,7 +62,7 @@ class AiController extends Controller
 PROMPT;
 
         try {
-            $response = \OpenAI::client(config('services.openai.api_key'))
+            $response = \OpenAI::client(\App\Models\PlatformSetting::openaiKey())
                 ->chat()->create([
                     'model'       => 'gpt-4o',
                     'messages'    => [

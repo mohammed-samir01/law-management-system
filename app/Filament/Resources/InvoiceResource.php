@@ -7,6 +7,7 @@ use App\Models\Invoice;
 use App\Services\PDFService;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -25,6 +26,18 @@ class InvoiceResource extends Resource
     protected static ?string $modelLabel = 'فاتورة';
     protected static ?string $pluralModelLabel = 'الفواتير';
     protected static ?int $navigationSort = 1;
+
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['invoice_number'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->invoice_number ?? ('#' . $record->id);
+    }
 
     public static function form(Form $form): Form
     {
@@ -141,6 +154,7 @@ class InvoiceResource extends Resource
                 Tables\Columns\TextColumn::make('total_amount')
                     ->label('الإجمالي')
                     ->money(fn ($record) => $record->currency)
+                    ->visible(fn () => \App\Support\FieldAccess::financials())
                     ->sortable(),
                 Tables\Columns\TextColumn::make('status')
                     ->label('الحالة')
@@ -188,6 +202,21 @@ class InvoiceResource extends Resource
                         $path = app(PDFService::class)->generateInvoicePDF($record);
                         return response()->download(storage_path('app/public/'.$path));
                     }),
+                Tables\Actions\Action::make('einvoice_qr')
+                    ->label(__('addons.einvoice_qr'))
+                    ->icon('heroicon-o-qr-code')
+                    ->color('gray')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('einvoice-tax') ?? false)
+                    ->modalHeading(__('addons.einvoice_qr'))
+                    ->modalDescription(__('addons.einvoice_qr_hint'))
+                    ->modalContent(fn ($record) => new \Illuminate\Support\HtmlString(
+                        '<div dir="ltr" style="word-break:break-all;font-family:monospace;font-size:12px;background:#f1f5f9;padding:12px;border-radius:8px;">'
+                        . e(app(\App\Services\ZatcaService::class)->qrPayload($record))
+                        . '</div>'
+                    ))
+                    ->modalSubmitAction(false)
+                    ->modalCancelActionLabel('إغلاق'),
+
                 Tables\Actions\Action::make('mark_paid')
                     ->label('تحديد كمدفوعة')
                     ->icon('heroicon-o-check-circle')
@@ -195,6 +224,57 @@ class InvoiceResource extends Resource
                     ->visible(fn ($record) => $record->status !== 'paid')
                     ->requiresConfirmation()
                     ->action(fn ($record) => $record->update(['status' => 'paid'])),
+                Tables\Actions\Action::make('create_installment_plan')
+                    ->label(__('addons.inst_create'))
+                    ->icon('heroicon-o-banknotes')
+                    ->color('warning')
+                    ->visible(fn ($record) => (auth()->user()?->office?->hasAddon('fee-installments') ?? false)
+                        && ! $record->installmentPlan()->exists()
+                        && ! in_array($record->status, ['paid', 'cancelled']))
+                    ->form([
+                        Forms\Components\TextInput::make('count')->label(__('addons.inst_count'))
+                            ->numeric()->minValue(2)->maxValue(36)->default(3)->required(),
+                        Forms\Components\DatePicker::make('first_due')->label(__('addons.inst_first_due'))
+                            ->default(now()->addMonth())->required(),
+                        Forms\Components\TextInput::make('interval_days')->label(__('addons.inst_interval'))
+                            ->numeric()->minValue(1)->default(30)->required(),
+                    ])
+                    ->action(function ($record, array $data) {
+                        if ($record->installmentPlan()->exists()) {
+                            Notification::make()->title(__('addons.inst_already'))->warning()->send();
+                            return;
+                        }
+                        app(\App\Services\InstallmentService::class)->createPlan(
+                            $record,
+                            (int) $data['count'],
+                            \Illuminate\Support\Carbon::parse($data['first_due']),
+                            (int) $data['interval_days'],
+                        );
+                        Notification::make()->title(__('addons.inst_created'))->success()->send();
+                    }),
+
+                Tables\Actions\Action::make('send_whatsapp')
+                    ->label('إرسال عبر واتساب')
+                    ->icon('heroicon-o-chat-bubble-left-right')
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('whatsapp') ?? false)
+                    ->requiresConfirmation()
+                    ->action(function ($record) {
+                        $phone = $record->client?->phone;
+                        if (blank($phone)) {
+                            Notification::make()->title(__('addons.esign_no_client'))->danger()->send();
+                            return;
+                        }
+
+                        \App\Jobs\SendWhatsappJob::dispatch($phone, __('addons.wa_invoice', [
+                            'number' => $record->invoice_number,
+                            'amount' => number_format((float) $record->total_amount, 2) . ' ' . ($record->currency ?? 'EGP'),
+                            'status' => $record->status,
+                            'app'    => config('app.name'),
+                        ]));
+
+                        Notification::make()->title('تم إرسال الفاتورة عبر واتساب')->success()->send();
+                    }),
                 Tables\Actions\EditAction::make()->label('تعديل'),
                 Tables\Actions\DeleteAction::make()->label('حذف'),
                 Tables\Actions\RestoreAction::make()->label('استعادة'),
@@ -216,7 +296,10 @@ class InvoiceResource extends Resource
 
     public static function getRelations(): array
     {
-        return [];
+        return [
+            // Visibility is gated per-record via the manager's canViewForRecord().
+            \App\Filament\Resources\InvoiceResource\RelationManagers\InstallmentsRelationManager::class,
+        ];
     }
 
     public static function getPages(): array

@@ -1,10 +1,28 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex,nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>{{ __('portal.client_portal') }} — {{ config('app.name') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
+
+    @if(auth()->user()?->office?->hasAddon('client-pwa'))
+    {{-- PWA (client-pwa addon) --}}
+    <meta name="theme-color" content="#1E3A5F">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="manifest" href="{{ route('portal.pwa.manifest') }}">
+    <link rel="apple-touch-icon" href="{{ route('portal.pwa.icon', ['size' => 192]) }}">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('{{ route('portal.pwa.sw') }}', { scope: '/portal/' });
+            });
+        }
+    </script>
+    @endif
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body { font-family: 'Tajawal', sans-serif; background: #f0f4f8; color: #1e293b; min-height: 100vh; }
@@ -162,7 +180,14 @@
     </div>
     <nav>
         <span style="color:#cbd5e1">{{ __('portal.welcome', ['name' => auth()->user()->name]) }}</span>
-        <a href="{{ route('portal.invoices.index') }}" style="color:#93c5fd;text-decoration:none;font-size:.85rem;">فواتيري</a>
+        <a href="{{ route('portal.invoices.index') }}" style="color:#93c5fd;text-decoration:none;font-size:.85rem;">{{ __('portal.my_invoices') }}</a>
+        <form method="POST" action="{{ route('portal.locale') }}" style="display:inline;">
+            @csrf
+            <input type="hidden" name="lang" value="{{ app()->isLocale('ar') ? 'en' : 'ar' }}">
+            <button type="submit" style="background:transparent;border:1px solid #475569;color:#cbd5e1;border-radius:6px;padding:.25rem .6rem;font-size:.8rem;cursor:pointer;">
+                {{ app()->isLocale('ar') ? 'English' : 'العربية' }}
+            </button>
+        </form>
         <form method="POST" action="{{ route('portal.logout') }}">
             @csrf
             <button type="submit">{{ __('portal.logout') }}</button>

@@ -23,6 +23,7 @@ class AIProcessJob implements ShouldQueue
         private readonly string $action,
         private readonly string $language = 'ar',
         private readonly int    $userId = 0,
+        private readonly int    $secondModelId = 0,
     ) {}
 
     public function handle(AIService $service): void
@@ -34,8 +35,23 @@ class AIProcessJob implements ShouldQueue
             'analyze_contract'   => $service->analyzeContract($this->morphable, $this->language),
             'summarize_case'     => $service->summarizeCase($this->morphable, $this->language),
             'suggest_strategy'   => $service->suggestStrategy($this->morphable, $this->language),
+            'draft_memo'         => $service->draftLegalMemo($this->morphable, $this->language),
+            'predict_outcome'    => $service->predictOutcome($this->morphable, $this->language),
+            'compare_contracts'  => $this->handleCompare($service),
             default              => Log::warning('Unknown AI action: ' . $this->action),
         };
+    }
+
+    private function handleCompare(AIService $service): void
+    {
+        $second = \App\Models\Document::withoutGlobalScopes()->find($this->secondModelId);
+
+        if (! $second) {
+            Log::warning('AIProcessJob compare: second document not found', ['id' => $this->secondModelId]);
+            return;
+        }
+
+        $service->compareContracts($this->morphable, $second, $this->language);
     }
 
     public function failed(\Throwable $e): void

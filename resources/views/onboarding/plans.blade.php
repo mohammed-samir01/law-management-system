@@ -1,4 +1,5 @@
 @extends('layouts.saas')
+@section('meta_robots')<meta name="robots" content="noindex,nofollow">@endsection
 
 @section('title', 'اختر خطتك — ميزان')
 
@@ -23,7 +24,7 @@
                     <input type="hidden" name="billing_cycle" value="monthly">
 
                     @if($isPopular)
-                        <span class="absolute -top-3 right-6 bg-gold text-white text-xs font-bold px-3 py-1 rounded-full">الأكثر شيوعاً</span>
+                        <span class="absolute -top-3 end-6 bg-gold text-white text-xs font-bold px-3 py-1 rounded-full">الأكثر شيوعاً</span>
                     @endif
 
                     <h3 class="text-xl font-bold text-navy mb-1">{{ $plan->getTranslation('name', 'ar') }}</h3>
@@ -42,7 +43,7 @@
                         @foreach(($plan->features ?? []) as $feature)
                         <li class="flex items-start gap-2 text-sm text-gray-600">
                             <svg class="w-5 h-5 text-green-500 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
-                            <span>{{ $feature }}</span>
+                            <span>{{ is_array($feature) ? ($feature['ar'] ?? '') : $feature }}</span>
                         </li>
                         @endforeach
                     </ul>

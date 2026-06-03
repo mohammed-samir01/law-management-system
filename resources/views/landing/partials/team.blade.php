@@ -18,7 +18,7 @@
         </div>
 
         <!-- Team grid -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-{{ count($team) <= 2 ? count($team) : '3' }} gap-8 items-stretch">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8 items-stretch">
 
             @foreach($team as $i => $member)
             @php

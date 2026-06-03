@@ -184,6 +184,20 @@
     </table>
     @endif
 
+    @if(isset($case->aiResults) && $case->aiResults->isNotEmpty())
+    <h2>المذكرات وتحليلات الذكاء الاصطناعي</h2>
+    @foreach($case->aiResults as $ai)
+    <table class="data" style="margin-bottom:10px;">
+        <thead>
+            <tr><th>{{ $ai->result_type ?? 'تحليل' }} — {{ $ai->created_at?->format('Y/m/d') }}</th></tr>
+        </thead>
+        <tbody>
+            <tr><td style="white-space:pre-wrap;">{{ \Illuminate\Support\Str::limit(strip_tags($ai->content ?? ''), 1500) }}</td></tr>
+        </tbody>
+    </table>
+    @endforeach
+    @endif
+
     <div class="footer">
         تقرير صادر بتاريخ {{ now()->format('Y/m/d H:i') }} — {{ config('app.name') }}
     </div>

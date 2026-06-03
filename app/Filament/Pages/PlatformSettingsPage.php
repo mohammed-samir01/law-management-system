@@ -7,6 +7,7 @@ use Filament\Forms;
 use Filament\Forms\Form;
 use Filament\Notifications\Notification;
 use Filament\Pages\Page;
+use Illuminate\Support\Facades\Auth;
 
 class PlatformSettingsPage extends Page
 {
@@ -21,12 +22,12 @@ class PlatformSettingsPage extends Page
 
     public static function canAccess(): bool
     {
-        return auth()->user()?->hasRole('super_admin') ?? false;
+        return Auth::user()?->hasRole('super_admin') ?? false;
     }
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole('super_admin') ?? false;
+        return Auth::user()?->hasRole('super_admin') ?? false;
     }
 
     public function mount(): void
@@ -49,6 +50,13 @@ class PlatformSettingsPage extends Page
                             ->directory('platform')
                             ->imageEditor()
                             ->maxSize(2048),
+                        Forms\Components\FileUpload::make('brand.favicon_path')
+                            ->label('Favicon (أيقونة التبويب)')
+                            ->helperText('PNG أو ICO أو SVG — يُفضَّل 512×512 px — يظهر في تبويب المتصفح')
+                            ->image()
+                            ->directory('platform')
+                            ->acceptedFileTypes(['image/png', 'image/x-icon', 'image/svg+xml', 'image/webp'])
+                            ->maxSize(512),
                     ])->columns(2),
 
                     Forms\Components\Tabs\Tab::make('القسم الرئيسي')->schema([
@@ -121,6 +129,58 @@ class PlatformSettingsPage extends Page
                         Forms\Components\TextInput::make('contact.instagram')->label('إنستغرام')->url(),
                         Forms\Components\TextInput::make('contact.linkedin')->label('لينكدإن')->url(),
                     ])->columns(2),
+
+                    // ── Tab: Marketing & Tracking ──────────────────────────────
+                    Forms\Components\Tabs\Tab::make('التسويق والتتبع')
+                        ->icon('heroicon-o-chart-bar')
+                        ->schema([
+                            Forms\Components\Section::make('Google Analytics 4')
+                                ->description('يتتبع زوار صفحة ميزان الرئيسية — احصل على الـ ID من Google Analytics → Admin → Data Streams.')
+                                ->schema([
+                                    Forms\Components\TextInput::make('tracking.ga4_id')
+                                        ->label('Measurement ID')
+                                        ->placeholder('G-XXXXXXXXXX')
+                                        ->helperText('يبدأ بـ G- — مثال: G-AB12CD34EF')
+                                        ->extraInputAttributes(['dir' => 'ltr'])
+                                        ->maxLength(20),
+                                ])->columns(1),
+
+                            Forms\Components\Section::make('Google Tag Manager')
+                                ->description('يتيح لك إضافة أي سكريبت تتبع (Meta Pixel، إلخ) بدون تعديل الكود — احصل على الـ ID من tagmanager.google.com.')
+                                ->schema([
+                                    Forms\Components\TextInput::make('tracking.gtm_id')
+                                        ->label('Container ID')
+                                        ->placeholder('GTM-XXXXXXX')
+                                        ->helperText('يبدأ بـ GTM- — مثال: GTM-ABC1234')
+                                        ->extraInputAttributes(['dir' => 'ltr'])
+                                        ->maxLength(15),
+                                ])->columns(1),
+
+                            Forms\Components\Section::make('Google Search Console')
+                                ->description('لإثبات ملكية منصة ميزان لجوجل — احصل على الكود من Search Console → Add Property → HTML Tag.')
+                                ->schema([
+                                    Forms\Components\TextInput::make('tracking.search_console_token')
+                                        ->label('Verification Token')
+                                        ->placeholder('xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx')
+                                        ->helperText('أدخل قيمة الـ content="..." فقط بدون الـ tag')
+                                        ->extraInputAttributes(['dir' => 'ltr'])
+                                        ->maxLength(100),
+                                ])->columns(1),
+
+                            Forms\Components\Placeholder::make('_tracking_note')
+                                ->label('')
+                                ->content(new \Illuminate\Support\HtmlString(
+                                    '<div class="rounded-lg bg-blue-50 dark:bg-blue-950 border border-blue-200 dark:border-blue-800 px-4 py-3 text-sm text-blue-800 dark:text-blue-300">'
+                                    . '<p class="font-semibold mb-1">💡 ملاحظة</p>'
+                                    . '<ul class="list-disc list-inside space-y-1 text-xs">'
+                                    . '<li>إذا أدخلت كلاهما — سيُستخدم GTM فقط (هو الأشمل).</li>'
+                                    . '<li>إذا أدخلت GA4 فقط — سيُحقن مباشرةً في الصفحة.</li>'
+                                    . '<li>هذه الإعدادات تخص صفحات منصة ميزان فقط — إعدادات كل مكتب منفصلة في لوحة المكتب.</li>'
+                                    . '</ul>'
+                                    . '</div>'
+                                ))
+                                ->columnSpanFull(),
+                        ]),
 
                 ]),
             ])

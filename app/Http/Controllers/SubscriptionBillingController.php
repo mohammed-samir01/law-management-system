@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Plan;
 use App\Models\Subscription;
 use App\Models\SubscriptionPayment;
+use App\Notifications\SubscriptionRenewedNotification;
 use App\Services\Billing\PlatformBillingService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -167,6 +168,15 @@ class SubscriptionBillingController extends Controller
                 'current_period_start' => now(),
                 'current_period_end'   => $end,
             ]);
+
+            // Re-activate the office if it was suspended
+            $subscription->office?->update(['is_active' => true]);
+
+            // Notify office admin of successful renewal
+            $admin = $subscription->office?->users()
+                ->whereHas('roles', fn ($q) => $q->where('name', 'office_admin'))
+                ->first();
+            $admin?->notify(new SubscriptionRenewedNotification($subscription->fresh()));
 
             // Reactivating from suspension → force email re-verification (if enabled).
             if ($wasSuspended) {

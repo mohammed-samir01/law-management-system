@@ -38,12 +38,12 @@ $activeSocials = array_filter($socialLinks, fn($s) => !empty($s['url']));
                             </svg>
                         </div>
                     @endif
-                    <span class="font-bold text-xl text-white" x-text="lang==='ar'?'عامر':'Amer'"></span>
+                    <span class="font-bold text-xl text-white" x-text="lang==='ar' ? (window.officeName?.ar || 'المكتب') : (window.officeName?.en || 'Office')"></span>
                 </a>
                 <p class="text-sm leading-relaxed mb-6"
                     x-text="lang==='ar'
-                        ? 'مكتب عامر للمحاماة — خدمات قانونية متكاملة بأعلى مستوى من الاحترافية والثقة منذ {{ $settings['hero']['founded_year'] }}'
-                        : 'Amer Law Office — comprehensive legal services with the highest standards of professionalism and trust since {{ $settings['hero']['founded_year'] }}'">
+                        ? (window.officeSubtitle?.ar || ('مكتب ' + (window.officeName?.ar || '') + ' للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة'))
+                        : (window.officeSubtitle?.en || ((window.officeName?.en || '') + ' Law Office — a team of expert lawyers delivering comprehensive legal services in civil, commercial, criminal, and family law'))">
                 </p>
                 <!-- Social links -->
                 @if(count($activeSocials) > 0)
@@ -121,7 +121,20 @@ $activeSocials = array_filter($socialLinks, fn($s) => !empty($s['url']));
 
         <!-- Bottom bar -->
         <div class="border-t border-white/10 py-6 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
-            <p x-text="lang==='ar' ? '© ' + new Date().getFullYear() + ' مكتب عامر للمحاماة. جميع الحقوق محفوظة.' : '© ' + new Date().getFullYear() + ' Amer Law Office. All rights reserved.'"></p>
+            <p x-text="lang==='ar'
+                ? '© ' + new Date().getFullYear() + ' ' + (window.officeName?.ar || 'المكتب') + '. جميع الحقوق محفوظة.'
+                : '© ' + new Date().getFullYear() + ' ' + (window.officeName?.en || 'Office') + '. All rights reserved.'">
+            </p>
+
+            @php $devName = $developer['name'] ?? 'Mohamed Shahin'; $devLink = $developer['linkedin'] ?? ''; @endphp
+            <a
+                @if($devLink) href="{{ $devLink }}" target="_blank" rel="noopener" @endif
+                class="text-white/30 hover:text-gold transition-colors duration-200 group {{ $devLink ? 'cursor-pointer' : 'cursor-default' }}"
+                x-text="lang === 'ar'
+                    ? 'تم تطوير هذا الموقع بواسطة {{ $devName }}'
+                    : 'Powered by {{ $devName }}'"
+            ></a>
+
             <div class="flex gap-4">
                 <a href="#" class="hover:text-gold transition-colors" x-text="lang==='ar'?'سياسة الخصوصية':'Privacy Policy'"></a>
                 <a href="#" class="hover:text-gold transition-colors" x-text="lang==='ar'?'شروط الاستخدام':'Terms of Service'"></a>

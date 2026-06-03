@@ -10,8 +10,10 @@ class PlatformSetting extends Model
 
     protected static function booted(): void
     {
-        // Any change to platform settings invalidates the cached `data`.
-        static::saved(fn () => \Illuminate\Support\Facades\Cache::forget('platform_settings_data'));
+        static::saved(function () {
+            \Illuminate\Support\Facades\Cache::forget('platform_settings_data');
+            \Illuminate\Support\Facades\Cache::forget('platform_settings_mail');
+        });
     }
 
     protected function casts(): array
@@ -21,6 +23,8 @@ class PlatformSetting extends Model
             'billing_config'    => 'encrypted:array',
             'billing_test_mode' => 'boolean',
             'mail_config'       => 'encrypted:array',
+            'messaging_config'  => 'encrypted:array',
+            'openai_api_key'    => 'encrypted',
         ];
     }
 
@@ -60,11 +64,35 @@ class PlatformSetting extends Model
      * Resolve the platform mail (SMTP) settings — dashboard-managed (encrypted),
      * falling back to config/.env when not set.
      */
-    public static function mail(): array
+    /**
+     * Resolve the OpenAI API key — prefers the dashboard-managed value (DB),
+     * falling back to config/services (.env) when not set.
+     */
+    public static function openaiKey(): string
     {
         $row = static::query()->first();
 
-        return $row?->mail_config ?: [];
+        return $row?->openai_api_key ?: config('services.openai.api_key', '');
+    }
+
+    public static function mail(): array
+    {
+        return \Illuminate\Support\Facades\Cache::remember('platform_settings_mail', 60, function () {
+            $row = static::query()->first();
+            return $row?->mail_config ?: [];
+        });
+    }
+
+    /**
+     * Resolve the platform messaging (SMS/WhatsApp) settings — dashboard-managed
+     * (encrypted). Shape: ['provider' => 'twilio', 'sid' => ..., 'token' => ...,
+     * 'sms_from' => ..., 'whatsapp_from' => ...].
+     */
+    public static function messaging(): array
+    {
+        $row = static::query()->first();
+
+        return $row?->messaging_config ?: [];
     }
 
     /**
@@ -152,6 +180,11 @@ class PlatformSetting extends Model
                 'twitter_x'  => null,
                 'instagram'  => null,
                 'linkedin'   => null,
+            ],
+            'tracking' => [
+                'ga4_id'               => null,
+                'gtm_id'               => null,
+                'search_console_token' => null,
             ],
         ];
     }

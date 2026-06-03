@@ -21,7 +21,9 @@ class Document extends Model implements HasMedia
     protected function casts(): array
     {
         return [
-            'version' => 'integer',
+            'version'            => 'integer',
+            'signing_expires_at' => 'datetime',
+            'signed_at'          => 'datetime',
         ];
     }
 
@@ -52,5 +54,29 @@ class Document extends Model implements HasMedia
     public function documentable()
     {
         return $this->morphTo();
+    }
+
+    public function signingClient(): BelongsTo
+    {
+        return $this->belongsTo(Client::class, 'signing_client_id');
+    }
+
+    /**
+     * Best-effort resolution of the client this document belongs to,
+     * via its morph parent (LegalCase has a client).
+     */
+    public function resolveClient(): ?Client
+    {
+        $parent = $this->documentable;
+
+        if ($parent instanceof LegalCase) {
+            return $parent->client;
+        }
+
+        if ($parent instanceof Hearing) {
+            return $parent->legalCase?->client;
+        }
+
+        return null;
     }
 }

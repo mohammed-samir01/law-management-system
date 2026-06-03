@@ -5,6 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <meta name="theme-color" content="#1E3A5F">
     <title>@yield('title', 'عامر')</title>
+
+    @if(auth()->check() && auth()->user()->hasAnyRole(['lawyer', 'office_admin']) && auth()->user()->office?->hasAddon('lawyer-pwa'))
+    {{-- Lawyer PWA (lawyer-pwa addon) --}}
+    <link rel="manifest" href="{{ route('mobile.lawyer.pwa.manifest') }}">
+    <link rel="apple-touch-icon" href="{{ route('mobile.lawyer.pwa.icon', ['size' => 192]) }}">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <script>
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', function () {
+                navigator.serviceWorker.register('{{ route('mobile.lawyer.pwa.sw') }}', { scope: '/mobile/' });
+            });
+        }
+    </script>
+    @endif
     {{-- Apply dark class before paint to prevent FOUC --}}
     <script>if(localStorage.getItem('amer_theme')==='dark')document.documentElement.classList.add('dark');</script>
     @vite(['resources/css/app.css', 'resources/js/app.js'])

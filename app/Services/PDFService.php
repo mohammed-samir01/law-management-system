@@ -5,7 +5,7 @@ namespace App\Services;
 use App\Models\Document;
 use App\Models\Invoice;
 use App\Models\LegalCase;
-use Barryvdh\DomPDF\Facade\Pdf;
+use App\Support\Pdf;
 use Illuminate\Support\Facades\Storage;
 
 class PDFService
@@ -14,14 +14,8 @@ class PDFService
     {
         $invoice->loadMissing(['client', 'legalCase', 'office']);
 
-        $pdf = Pdf::loadView('pdf.invoice', compact('invoice'))
-            ->setPaper('a4')
-            ->setOption('defaultFont', 'Amiri')
-            ->setOption('isFontSubsettingEnabled', true)
-            ->setOption('isRemoteEnabled', false);
-
         $path = "invoices/{$invoice->invoice_number}.pdf";
-        Storage::disk('public')->put($path, $pdf->output());
+        Storage::disk('public')->put($path, Pdf::make('pdf.invoice', compact('invoice')));
 
         $invoice->update(['pdf_path' => $path]);
 
@@ -30,16 +24,10 @@ class PDFService
 
     public function generateCaseReportPDF(LegalCase $case): string
     {
-        $case->loadMissing(['client', 'lawyers', 'hearings', 'documents', 'office']);
-
-        $pdf = Pdf::loadView('pdf.case-report', compact('case'))
-            ->setPaper('a4')
-            ->setOption('defaultFont', 'Amiri')
-            ->setOption('isFontSubsettingEnabled', true)
-            ->setOption('isRemoteEnabled', false);
+        $case->loadMissing(['client', 'lawyers', 'hearings', 'documents', 'office', 'aiResults']);
 
         $path = "cases/{$case->case_number}-report.pdf";
-        Storage::disk('public')->put($path, $pdf->output());
+        Storage::disk('public')->put($path, Pdf::make('pdf.case-report', compact('case')));
 
         return $path;
     }
@@ -48,16 +36,11 @@ class PDFService
     {
         $document->loadMissing(['office', 'uploadedBy', 'documentable']);
 
-        $pdf = Pdf::loadView('pdf.document', compact('document'))
-            ->setPaper('a4')
-            ->setOption('defaultFont', 'Amiri')
-            ->setOption('isFontSubsettingEnabled', true)
-            ->setOption('isRemoteEnabled', false);
-
+        $bytes    = Pdf::make('pdf.document', compact('document'));
         $filename = 'document-' . $document->id . '.pdf';
 
         return response()->streamDownload(
-            fn () => print($pdf->output()),
+            fn () => print($bytes),
             $filename,
             ['Content-Type' => 'application/pdf']
         );

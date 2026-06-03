@@ -1,7 +1,8 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="{{ app()->getLocale() }}" dir="{{ app()->isLocale('ar') ? 'rtl' : 'ltr' }}">
 <head>
     <meta charset="UTF-8">
+    <meta name="robots" content="noindex,nofollow">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>فاتورة {{ $invoice->invoice_number }} — {{ config('app.name') }}</title>
     <link href="https://fonts.googleapis.com/css2?family=Tajawal:wght@300;400;500;700&display=swap" rel="stylesheet">
@@ -142,6 +143,37 @@
             <span class="value">{{ number_format($invoice->total_amount, 2) }} {{ $invoice->currency }}</span>
         </div>
     </div>
+
+    {{-- Installment plan schedule (fee-installments addon) --}}
+    @if($invoice->installmentPlan)
+    <div class="card">
+        <div class="section-title">{{ __('addons.inst_installments') }}</div>
+        <table style="width:100%;border-collapse:collapse;font-size:.9rem;">
+            <thead>
+                <tr style="color:#64748b;text-align:start;">
+                    <th style="padding:.5rem;text-align:start;">#</th>
+                    <th style="padding:.5rem;text-align:start;">{{ __('addons.inst_amount') }}</th>
+                    <th style="padding:.5rem;text-align:start;">{{ __('addons.inst_due_date') }}</th>
+                    <th style="padding:.5rem;text-align:start;">{{ __('addons.inst_status') }}</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach($invoice->installmentPlan->installments as $inst)
+                <tr style="border-top:1px solid #1e293b;">
+                    <td style="padding:.5rem;">{{ $inst->sequence }}</td>
+                    <td style="padding:.5rem;">{{ number_format($inst->amount, 2) }} {{ $invoice->currency }}</td>
+                    <td style="padding:.5rem;" dir="ltr">{{ $inst->due_date?->format('Y/m/d') }}</td>
+                    <td style="padding:.5rem;">
+                        <span style="color:{{ $inst->status === 'paid' ? '#16a34a' : ($inst->isOverdue() ? '#dc2626' : '#d97706') }};">
+                            {{ __('addons.inst_status_' . $inst->status) }}
+                        </span>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+    </div>
+    @endif
 
     {{-- Payment form --}}
     @if(in_array($invoice->status, ['sent', 'overdue']))

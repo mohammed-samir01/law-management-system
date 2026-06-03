@@ -53,12 +53,20 @@ use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    public function register(): void {}
+    public function register(): void
+    {
+        // Critical-deadline provider for CriticalAlertsWidget. The implementation
+        // self-gates on the legal-deadlines addon, so binding it unconditionally
+        // is safe whether or not an office purchased the addon.
+        $this->app->bind(
+            \App\Contracts\CriticalDeadlineProvider::class,
+            \App\Services\Deadlines\DeadlineCriticalProvider::class,
+        );
+    }
 
     public function boot(): void
     {
@@ -94,6 +102,11 @@ class AppServiceProvider extends ServiceProvider
         Gate::policy(Plan::class,             PlanPolicy::class);
         Gate::policy(Subscription::class,     SubscriptionPolicy::class);
         Gate::policy(PlatformLead::class,     PlatformLeadPolicy::class);
+        Gate::policy(\App\Models\Task::class,             \App\Policies\TaskPolicy::class);
+        Gate::policy(\App\Models\CommunicationLog::class, \App\Policies\CommunicationLogPolicy::class);
+        Gate::policy(\App\Models\TimeEntry::class,        \App\Policies\TimeEntryPolicy::class);
+        Gate::policy(\App\Models\InstallmentPlan::class,  \App\Policies\InstallmentPlanPolicy::class);
+        Gate::policy(\App\Models\CaseDeadline::class,     \App\Policies\CaseDeadlinePolicy::class);
 
         // super_admin bypasses all policies
         Gate::before(function (User $user, string $ability) {
@@ -130,10 +143,6 @@ class AppServiceProvider extends ServiceProvider
     private function applyDynamicMailConfig(): void
     {
         try {
-            if (! Schema::hasTable('platform_settings')) {
-                return;
-            }
-
             $mail = PlatformSetting::mail();
             if (empty($mail) || empty($mail['host'])) {
                 return;

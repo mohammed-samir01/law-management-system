@@ -27,7 +27,7 @@ class PlatformBillingSettingsPage extends Page
 
     public static function shouldRegisterNavigation(): bool
     {
-        return auth()->user()?->hasRole('super_admin') ?? false;
+        return false;
     }
 
     public function mount(): void

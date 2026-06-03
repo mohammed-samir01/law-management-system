@@ -64,6 +64,13 @@ class DemoDataSeeder extends Seeder
             'email'    => 'amerm5798@gmail.com',
             'address'  => ['street' => 'الطيبة', 'city' => 'الزقازيق', 'governorate' => 'الشرقية', 'country' => 'مصر'],
             'settings' => [
+                'branding' => [
+                    'name_ar'       => 'مكتب عامر للمحاماة',
+                    'name_en'       => 'Amer Law Office',
+                    'logo_path'     => null,
+                    'primary_color' => '#1E3A5F',
+                    'accent_color'  => '#C9A84C',
+                ],
                 'hero' => [
                     'image_path'        => '/images/hero-default.webp',
                     'heading_ar'        => 'نُحقِّق العدالة بكل احترافية',

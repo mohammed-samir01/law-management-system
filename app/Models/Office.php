@@ -2,11 +2,16 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Str;
 use Spatie\Translatable\HasTranslations;
 
 class Office extends Model
@@ -17,12 +22,66 @@ class Office extends Model
 
     public $translatable = ['name', 'address'];
 
+    protected static function booted(): void
+    {
+        static::deleting(function (Office $office) {
+            $office->users()->delete();
+        });
+
+        // Reset verification and generate a new token when domain changes
+        static::saving(function (Office $office) {
+            if ($office->isDirty('custom_domain')) {
+                $office->domain_verified_at = null;
+                $office->domain_verify_token = $office->custom_domain
+                    ? 'mizan-verify=' . Str::random(32)
+                    : null;
+            }
+        });
+
+        // Bust the domain cache whenever domain-related fields change
+        static::saved(function (Office $office) {
+            if ($office->wasChanged(['custom_domain', 'domain_verified_at', 'is_active'])) {
+                $old = $office->getOriginal('custom_domain');
+                $new = $office->custom_domain;
+                if ($old) Cache::forget("custom_domain:{$old}");
+                if ($new) Cache::forget("custom_domain:{$new}");
+            }
+        });
+    }
+
     protected function casts(): array
     {
         return [
-            'settings' => 'array',
-            'is_active' => 'boolean',
+            'settings'           => 'array',
+            'is_active'          => 'boolean',
+            'domain_verified_at' => 'datetime',
         ];
+    }
+
+    // ── Domain helpers ────────────────────────────────────────────────────────
+
+    public function isDomainVerified(): bool
+    {
+        return $this->domain_verified_at !== null;
+    }
+
+    /** Normalize a raw domain string: lowercase, no scheme, no trailing slash */
+    public static function normalizeDomain(string $raw): string
+    {
+        $host = strtolower(trim($raw));
+        $host = preg_replace('#^https?://#', '', $host);
+        return rtrim($host, '/');
+    }
+
+    /** Scope: match a verified, active, non-deleted office by its custom domain */
+    public function scopeByVerifiedDomain(Builder $query, string $host): Builder
+    {
+        return $query
+            ->whereNotNull('domain_verified_at')
+            ->whereNotNull('custom_domain')
+            ->where('custom_domain', $host)
+            ->where('is_active', true)
+            ->whereNull('deleted_at');
     }
 
     public function users(): HasMany
@@ -120,5 +179,22 @@ class Office extends Model
         $sub = $this->subscription;
 
         return ($sub && $sub->isUsable()) ? $sub->plan : null;
+    }
+
+    public function addons(): BelongsToMany
+    {
+        return $this->belongsToMany(Addon::class, 'office_addons')
+            ->withPivot(['status', 'billing_cycle', 'activated_at', 'expires_at', 'cancelled_at'])
+            ->withTimestamps();
+    }
+
+    public function activeAddons(): Collection
+    {
+        return $this->addons()->wherePivot('status', 'active')->get();
+    }
+
+    public function hasAddon(string $slug): bool
+    {
+        return $this->activeAddons()->contains('slug', $slug);
     }
 }

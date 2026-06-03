@@ -31,6 +31,18 @@ class DocumentResource extends Resource
     protected static ?string $pluralModelLabel = 'الوثائق';
     protected static ?int $navigationSort = 1;
 
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['title'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->getTranslation('title', 'ar') ?: $record->getTranslation('title', 'en') ?: ('#' . $record->id);
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -163,6 +175,22 @@ class DocumentResource extends Resource
                         'archived' => 'مؤرشف',
                         default    => $state,
                     }),
+                Tables\Columns\TextColumn::make('signing_status')
+                    ->label(__('addons.esign_status'))
+                    ->badge()
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('esignature') ?? false)
+                    ->color(fn ($state) => match($state) {
+                        'signed'   => 'success',
+                        'pending'  => 'warning',
+                        'rejected' => 'danger',
+                        default    => 'gray',
+                    })
+                    ->formatStateUsing(fn ($state) => match($state) {
+                        'pending'  => __('addons.esign_status_pending'),
+                        'signed'   => __('addons.esign_status_signed'),
+                        'rejected' => __('addons.esign_status_rejected'),
+                        default    => __('addons.esign_status_none'),
+                    }),
                 Tables\Columns\TextColumn::make('version')
                     ->label('الإصدار')
                     ->sortable(),
@@ -196,6 +224,31 @@ class DocumentResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->headerActions([
+                Tables\Actions\Action::make('smart_from_template')
+                    ->label(__('addons.tpl_smart_generate'))
+                    ->icon('heroicon-o-sparkles')
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('smart-templates') ?? false)
+                    ->form([
+                        Forms\Components\Select::make('template_id')
+                            ->label('اختر القالب')
+                            ->options(fn () => DocumentTemplate::where('is_active', true)->get()
+                                ->mapWithKeys(fn ($t) => [$t->id => $t->getTranslation('name', 'ar') ?: $t->getTranslation('name', 'en')]))
+                            ->searchable()->required(),
+                        Forms\Components\Select::make('case_id')
+                            ->label('القضية (لتعبئة البيانات تلقائياً)')
+                            ->options(fn () => LegalCase::get()->mapWithKeys(fn ($c) => [
+                                $c->id => $c->case_number . ' — ' . ($c->getTranslation('title', 'ar') ?: $c->getTranslation('title', 'en')),
+                            ]))
+                            ->searchable()->preload()->required(),
+                    ])
+                    ->action(function (array $data) {
+                        $template = DocumentTemplate::findOrFail($data['template_id']);
+                        $case     = LegalCase::find($data['case_id']);
+                        app(\App\Services\SmartTemplateService::class)->generate($template, $case);
+                        \Filament\Notifications\Notification::make()->title(__('addons.tpl_generated'))->success()->send();
+                    }),
+
                 Tables\Actions\Action::make('from_template')
                     ->label('إنشاء من قالب')
                     ->icon('heroicon-o-document-duplicate')
@@ -306,6 +359,43 @@ class DocumentResource extends Resource
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),
                 ])->label(__('ai.ai_analysis'))->icon('heroicon-o-sparkles'),
+
+                Tables\Actions\Action::make('ai_compare_contracts')
+                    ->label(__('addons.ai_compare_contracts'))
+                    ->icon('heroicon-o-scale')
+                    ->color('info')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('advanced-ai') ?? false)
+                    ->form([
+                        Forms\Components\Select::make('second_document_id')
+                            ->label(__('addons.ai_select_second_doc'))
+                            ->options(fn (Document $record) => Document::where('id', '!=', $record->id)
+                                ->pluck('title', 'id')
+                                ->map(fn ($t) => is_array($t) ? ($t['ar'] ?? reset($t)) : $t))
+                            ->searchable()
+                            ->required(),
+                    ])
+                    ->action(function (Document $record, array $data) {
+                        if (! static::guardAi()) return;
+                        AIProcessJob::dispatch($record, 'compare_contracts', 'ar', auth()->id(), (int) $data['second_document_id']);
+                        Notification::make()->title(__('ai.request_queued'))->success()->send();
+                    }),
+
+                Tables\Actions\Action::make('send_for_signature')
+                    ->label(__('addons.esign_send'))
+                    ->icon('heroicon-o-pencil-square')
+                    ->color('success')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('esignature') ?? false)
+                    ->requiresConfirmation()
+                    ->action(function (Document $record) {
+                        $client = $record->resolveClient();
+                        if (! $client) {
+                            Notification::make()->title(__('addons.esign_no_client'))->danger()->send();
+                            return;
+                        }
+
+                        app(\App\Services\DocumentSigningService::class)->requestSignature($record, $client);
+                        Notification::make()->title(__('addons.esign_sent'))->success()->send();
+                    }),
 
                 Tables\Actions\DeleteAction::make()->label('حذف'),
                 Tables\Actions\RestoreAction::make()->label('استعادة'),

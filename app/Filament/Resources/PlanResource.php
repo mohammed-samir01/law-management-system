@@ -60,9 +60,16 @@ class PlanResource extends Resource
             Forms\Components\Section::make('مميزات العرض (تظهر في صفحة الأسعار)')->schema([
                 Forms\Components\Repeater::make('features')
                     ->label('المميزات')
-                    ->simple(
-                        Forms\Components\TextInput::make('feature')->label('ميزة')->required()
-                    )
+                    ->schema([
+                        Forms\Components\TextInput::make('ar')
+                            ->label('الميزة (عربي)')
+                            ->required(),
+                        Forms\Components\TextInput::make('en')
+                            ->label('Feature (English)')
+                            ->required()
+                            ->extraInputAttributes(['dir' => 'ltr']),
+                    ])
+                    ->columns(2)
                     ->addActionLabel('إضافة ميزة')
                     ->default([]),
             ]),

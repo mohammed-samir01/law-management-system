@@ -116,11 +116,14 @@ class AIResultResource extends Resource
                 Tables\Columns\TextColumn::make('result_type')
                     ->label(__('ai.action'))
                     ->formatStateUsing(fn ($state) => match($state) {
-                        'document_summary'   => __('ai.actions.summarize_document'),
-                        'contract_analysis'  => __('ai.actions.analyze_contract'),
-                        'case_summary'       => __('ai.actions.summarize_case'),
-                        'strategy_suggestion'=> __('ai.actions.suggest_strategy'),
-                        default              => $state,
+                        'document_summary'    => __('ai.actions.summarize_document'),
+                        'contract_analysis'   => __('ai.actions.analyze_contract'),
+                        'case_summary'        => __('ai.actions.summarize_case'),
+                        'strategy_suggestion' => __('ai.actions.suggest_strategy'),
+                        'legal_memo'          => __('addons.ai_draft_memo'),
+                        'contract_comparison' => __('addons.ai_compare_contracts'),
+                        'case_prediction'     => __('addons.ai_prediction_result'),
+                        default               => $state,
                     })
                     ->badge()
                     ->color('primary'),

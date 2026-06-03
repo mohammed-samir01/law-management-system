@@ -25,6 +25,9 @@ class CheckOverdueInvoicesJob implements ShouldQueue
             ->whereIn('status', ['sent', 'draft'])
             ->whereNotNull('due_date')
             ->whereDate('due_date', '<=', now())
+            // Invoices under an active installment plan follow their own schedule —
+            // don't flip them to overdue by the parent invoice due_date.
+            ->whereDoesntHave('installmentPlan', fn ($q) => $q->where('status', 'active'))
             ->with(['office', 'client'])
             ->get();
 

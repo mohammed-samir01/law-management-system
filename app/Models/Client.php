@@ -62,4 +62,9 @@ class Client extends Model
     {
         return $this->hasMany(Invoice::class);
     }
+
+    public function communications(): HasMany
+    {
+        return $this->hasMany(CommunicationLog::class);
+    }
 }

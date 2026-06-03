@@ -49,6 +49,7 @@
             <!-- Text content -->
             <div class="order-2 lg:order-1">
                 <!-- Badge -->
+                @if(!empty($hero['founded_year']))
                 <div class="inline-flex items-center gap-2 bg-gold/20 border border-gold/40 rounded-full px-4 py-1.5 mb-6 scroll-animate opacity-0">
                     <span class="w-2 h-2 rounded-full bg-gold animate-pulse"></span>
                     <span class="text-gold text-sm font-medium"
@@ -57,6 +58,7 @@
                             : 'Specialized Law Firm Since {{ $hero['founded_year'] }}'">
                     </span>
                 </div>
+                @endif
 
                 <!-- Typing headline -->
                 <h1
@@ -71,7 +73,9 @@
                 <p
                     class="text-lg text-gray-300 leading-relaxed mb-8 max-w-lg scroll-animate opacity-0"
                     style="animation-delay:0.2s;"
-                    x-text="lang==='ar' ? '{{ addslashes($hero['subtitle_ar']) }}' : '{{ addslashes($hero['subtitle_en']) }}'"
+                    x-text="lang==='ar'
+                        ? (window.officeSubtitle?.ar || ('مكتب ' + (window.officeName?.ar || '') + ' للمحاماة — فريق من أمهر المحامين يقدم خدمات قانونية متكاملة في القضايا المدنية والتجارية والجنائية وقضايا الأسرة'))
+                        : (window.officeSubtitle?.en || ((window.officeName?.en || '') + ' Law Office — a team of expert lawyers delivering comprehensive legal services in civil, commercial, criminal, and family law'))"
                 ></p>
 
                 <!-- CTA Buttons -->
@@ -226,7 +230,7 @@
                                               d="M3 6l3 1m0 0l-3 9a5.002 5.002 0 006.001 0M6 7l3 9M6 7l6-2m6 2l3-1m-3 1l-3 9a5.002 5.002 0 006.001 0M18 7l3 9m-3-9l-6-2m0-2v2m0 16V5m0 16H9m3 0h3"/>
                                     </svg>
                                     <p style="color:#C9A84C;font-weight:700;font-size:1rem;font-family:'Tajawal',sans-serif;"
-                                       x-text="lang==='ar'?'عامر':'Amer'"></p>
+                                       x-text="lang==='ar' ? (window.officeName?.ar || '') : (window.officeName?.en || '')"></p>
                                 </div>
                             @endif
                             <!-- Shine -->
@@ -237,22 +241,22 @@
 
                     <!-- ── CORNER BRACKETS (picture-frame effect) ───────── -->
                     <div style="position:absolute;inset:-2px;pointer-events:none;">
-                        <!-- Top-left -->
-                        <div style="position:absolute;top:10px;left:10px;width:22px;height:22px;
-                                    border-top:2.5px solid #C9A84C;border-left:2.5px solid #C9A84C;
-                                    border-radius:4px 0 0 0;opacity:0.85;"></div>
-                        <!-- Top-right -->
-                        <div style="position:absolute;top:10px;right:10px;width:22px;height:22px;
-                                    border-top:2.5px solid #C9A84C;border-right:2.5px solid #C9A84C;
-                                    border-radius:0 4px 0 0;opacity:0.85;"></div>
-                        <!-- Bottom-left -->
-                        <div style="position:absolute;bottom:10px;left:10px;width:22px;height:22px;
-                                    border-bottom:2.5px solid #C9A84C;border-left:2.5px solid #C9A84C;
-                                    border-radius:0 0 0 4px;opacity:0.85;"></div>
-                        <!-- Bottom-right -->
-                        <div style="position:absolute;bottom:10px;right:10px;width:22px;height:22px;
-                                    border-bottom:2.5px solid #C9A84C;border-right:2.5px solid #C9A84C;
-                                    border-radius:0 0 4px 0;opacity:0.85;"></div>
+                        <!-- Top-start -->
+                        <div style="position:absolute;top:10px;inset-inline-start:10px;width:22px;height:22px;
+                                    border-top:2.5px solid #C9A84C;border-inline-start:2.5px solid #C9A84C;
+                                    border-start-start-radius:4px;opacity:0.85;"></div>
+                        <!-- Top-end -->
+                        <div style="position:absolute;top:10px;inset-inline-end:10px;width:22px;height:22px;
+                                    border-top:2.5px solid #C9A84C;border-inline-end:2.5px solid #C9A84C;
+                                    border-start-end-radius:4px;opacity:0.85;"></div>
+                        <!-- Bottom-start -->
+                        <div style="position:absolute;bottom:10px;inset-inline-start:10px;width:22px;height:22px;
+                                    border-bottom:2.5px solid #C9A84C;border-inline-start:2.5px solid #C9A84C;
+                                    border-end-start-radius:4px;opacity:0.85;"></div>
+                        <!-- Bottom-end -->
+                        <div style="position:absolute;bottom:10px;inset-inline-end:10px;width:22px;height:22px;
+                                    border-bottom:2.5px solid #C9A84C;border-inline-end:2.5px solid #C9A84C;
+                                    border-end-end-radius:4px;opacity:0.85;"></div>
                     </div>
                 </div>
             </div>
@@ -260,17 +264,17 @@
 
         <!-- Stats bar -->
         <div class="mt-12 sm:mt-16 lg:mt-20 grid grid-cols-3 scroll-animate opacity-0" style="animation-delay:0.4s;">
-            <div class="text-center border-e border-white/10 px-4 py-2">
-                <div class="text-5xl sm:text-6xl lg:text-7xl font-bold text-gold leading-none" data-counter="{{ $hero['stat_cases'] }}">0</div>
-                <div class="text-gray-300 text-sm sm:text-base lg:text-lg mt-3 font-medium" x-text="lang==='ar'?'قضية ناجحة':'Successful Cases'"></div>
+            <div class="text-center border-e border-white/10 px-2 sm:px-4 py-2">
+                <div class="text-3xl sm:text-5xl lg:text-7xl font-bold text-gold leading-none" dir="ltr" style="unicode-bidi:isolate;"><span data-counter="{{ $hero['stat_cases'] ?? 500 }}">0</span>+</div>
+                <div class="text-gray-300 text-xs sm:text-base lg:text-lg mt-2 sm:mt-3 font-medium" x-text="lang==='ar'?'قضية ناجحة':'Successful Cases'"></div>
             </div>
-            <div class="text-center border-e border-white/10 px-4 py-2">
-                <div class="text-5xl sm:text-6xl lg:text-7xl font-bold text-gold leading-none" data-counter="{{ $hero['stat_years'] }}">0</div>
-                <div class="text-gray-300 text-sm sm:text-base lg:text-lg mt-3 font-medium" x-text="lang==='ar'?'سنة خبرة':'Years Experience'"></div>
+            <div class="text-center border-e border-white/10 px-2 sm:px-4 py-2">
+                <div class="text-3xl sm:text-5xl lg:text-7xl font-bold text-gold leading-none" dir="ltr" style="unicode-bidi:isolate;"><span data-counter="{{ $hero['stat_years'] ?? 25 }}">0</span>+</div>
+                <div class="text-gray-300 text-xs sm:text-base lg:text-lg mt-2 sm:mt-3 font-medium" x-text="lang==='ar'?'سنة خبرة':'Years Experience'"></div>
             </div>
-            <div class="text-center px-4 py-2">
-                <div class="text-5xl sm:text-6xl lg:text-7xl font-bold text-gold leading-none" data-counter="{{ $hero['stat_satisfaction'] }}">0</div>
-                <div class="text-gray-300 text-sm sm:text-base lg:text-lg mt-3 font-medium" x-text="lang==='ar'?'رضا العملاء %':'Satisfaction %'"></div>
+            <div class="text-center px-2 sm:px-4 py-2">
+                <div class="text-3xl sm:text-5xl lg:text-7xl font-bold text-gold leading-none" dir="ltr" style="unicode-bidi:isolate;"><span data-counter="{{ $hero['stat_satisfaction'] ?? 98 }}">0</span>%</div>
+                <div class="text-gray-300 text-xs sm:text-base lg:text-lg mt-2 sm:mt-3 font-medium" x-text="lang==='ar'?'رضا العملاء %':'Satisfaction %'"></div>
             </div>
         </div>
     </div>

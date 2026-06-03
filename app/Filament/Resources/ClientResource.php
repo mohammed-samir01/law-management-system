@@ -23,6 +23,23 @@ class ClientResource extends Resource
     public static function getPluralModelLabel(): string { return 'العملاء'; }
     public static function getNavigationLabel(): string { return 'العملاء'; }
 
+    protected static int $globalSearchResultsLimit = 10;
+
+    public static function getGloballySearchableAttributes(): array
+    {
+        return ['name', 'phone', 'email'];
+    }
+
+    public static function getGlobalSearchResultTitle(\Illuminate\Database\Eloquent\Model $record): string
+    {
+        return $record->getTranslation('name', 'ar') ?: ($record->phone ?? (string) $record->id);
+    }
+
+    public static function getGlobalSearchResultDetails(\Illuminate\Database\Eloquent\Model $record): array
+    {
+        return array_filter(['الهاتف' => $record->phone, 'البريد' => $record->email]);
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([
@@ -115,6 +132,30 @@ class ClientResource extends Resource
             ->actions([
                 Tables\Actions\ViewAction::make(),
                 Tables\Actions\EditAction::make(),
+                Tables\Actions\Action::make('link_telegram')
+                    ->label(__('addons.tg_link'))
+                    ->icon('heroicon-o-paper-airplane')
+                    ->color('info')
+                    ->visible(fn () => \App\Services\Messaging\MessagingService::isTelegramConfigured())
+                    ->action(function (Client $record) {
+                        $username = \App\Models\PlatformSetting::messaging()['telegram']['bot_username'] ?? '';
+                        if (! $username) {
+                            \Filament\Notifications\Notification::make()->title(__('addons.tg_no_bot'))->danger()->send();
+                            return;
+                        }
+
+                        $token = \Illuminate\Support\Str::random(32);
+                        $record->forceFill(['telegram_link_token' => $token, 'telegram_chat_id' => null])->save();
+
+                        $url = 'https://t.me/' . ltrim($username, '@') . '?start=' . $token;
+
+                        \Filament\Notifications\Notification::make()
+                            ->title(__('addons.tg_link_ready'))
+                            ->body($url)
+                            ->info()
+                            ->persistent()
+                            ->send();
+                    }),
                 Tables\Actions\DeleteAction::make(),
             ])
             ->bulkActions([
@@ -141,5 +182,25 @@ class ClientResource extends Resource
         return parent::getEloquentQuery()
             ->withoutGlobalScopes([\Illuminate\Database\Eloquent\SoftDeletingScope::class])
             ->with(['user']);
+    }
+
+    /**
+     * Global search must not surface soft-deleted clients (office scope preserved).
+     */
+    public static function getGlobalSearchEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['user']);
+    }
+
+    /**
+     * Append-only relation-manager registry (shared foundation).
+     * Features MUST append, never replace. e.g. comm_log appends
+     * CommunicationLogsRelationManager::class (core, unconditional).
+     */
+    public static function getRelations(): array
+    {
+        return array_filter([
+            \App\Filament\RelationManagers\CommunicationLogsRelationManager::class, // comm_log (core)
+        ]);
     }
 }

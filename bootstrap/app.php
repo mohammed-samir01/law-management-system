@@ -19,6 +19,9 @@ return Application::configure(basePath: dirname(__DIR__))
         },
     )
     ->withMiddleware(function (Middleware $middleware) {
+        // Must run before routing so custom domains are intercepted first
+        $middleware->prepend(\App\Http\Middleware\HandleCustomDomain::class);
+
         // Redirect unauthenticated users: portal/* → portal login, else admin login
         $middleware->redirectGuestsTo(function ($request) {
             if ($request->is('mobile/*') || $request->is('mobile')) {
@@ -54,6 +57,8 @@ return Application::configure(basePath: dirname(__DIR__))
             'client.portal'      => \App\Http\Middleware\EnsureClientRole::class,
             'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
             'verified.otp'       => \App\Http\Middleware\EnsureEmailVerified::class,
+            'addon'              => \App\Http\Middleware\CheckAddon::class,
+            'portal.locale'      => \App\Http\Middleware\SetPortalLocale::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions) {

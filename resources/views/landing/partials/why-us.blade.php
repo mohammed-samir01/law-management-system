@@ -21,7 +21,7 @@ $iconMap = [
             <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto" x-text="lang==='ar'?'نؤمن أن كل عميل يستحق أفضل تمثيل قانوني ممكن':'We believe every client deserves the best possible legal representation'"></p>
         </div>
 
-        <div class="grid grid-cols-1 md:grid-cols-{{ count($whyUs) <= 2 ? count($whyUs) : '3' }} gap-10">
+        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-10">
             @foreach($whyUs as $i => $item)
             @php $svgPath = $iconMap[$item['icon'] ?? 'lightbulb'] ?? $iconMap['lightbulb']; @endphp
             <div class="text-center scroll-animate opacity-0" style="animation-delay:{{ $i * 0.1 }}s;">

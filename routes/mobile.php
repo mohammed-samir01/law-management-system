@@ -33,6 +33,11 @@ Route::prefix('mobile')->name('mobile.')->group(function () {
     Route::middleware(['auth'])->prefix('lawyer')->name('lawyer.')->group(function () {
         Route::get('dashboard', [LawyerDashboardController::class, 'index'])->name('dashboard');
 
+        // PWA (lawyer-pwa addon) — installable lawyer app
+        Route::get('manifest.webmanifest', [\App\Http\Controllers\PwaController::class, 'lawyerManifest'])->name('pwa.manifest');
+        Route::get('service-worker.js', [\App\Http\Controllers\PwaController::class, 'lawyerServiceWorker'])->name('pwa.sw');
+        Route::get('pwa-icon/{size}', [\App\Http\Controllers\PwaController::class, 'lawyerIcon'])->name('pwa.icon');
+
         Route::get('cases',       [LawyerCaseController::class, 'index'])->name('cases');
         Route::get('cases/{id}',  [LawyerCaseController::class, 'show'])->name('cases.show');
         Route::get('cases/{id}/documents',        [LawyerDocumentController::class, 'index'])->name('cases.documents');

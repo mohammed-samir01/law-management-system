@@ -102,4 +102,24 @@ class LegalCase extends Model
     {
         return $this->morphMany(AIResult::class, 'model');
     }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'case_id');
+    }
+
+    public function communications(): HasMany
+    {
+        return $this->hasMany(CommunicationLog::class, 'case_id');
+    }
+
+    public function timeEntries(): HasMany
+    {
+        return $this->hasMany(TimeEntry::class, 'case_id');
+    }
+
+    public function deadlines(): HasMany
+    {
+        return $this->hasMany(CaseDeadline::class, 'case_id');
+    }
 }

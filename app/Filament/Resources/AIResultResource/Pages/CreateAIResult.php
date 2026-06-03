@@ -26,10 +26,10 @@ class CreateAIResult extends CreateRecord
             default => throw new \InvalidArgumentException(__('ai.no_subject_selected')),
         };
 
-        if (empty(config('services.openai.api_key'))) {
+        if (empty(\App\Models\PlatformSetting::openaiKey())) {
             Notification::make()
                 ->title('مفتاح OpenAI API غير مضاف')
-                ->body('يرجى إضافة OPENAI_API_KEY في ملف .env ثم تشغيل: php artisan config:clear')
+                ->body('أضِف مفتاح OpenAI من: إعدادات المنصة ← الذكاء الاصطناعي.')
                 ->danger()
                 ->send();
 

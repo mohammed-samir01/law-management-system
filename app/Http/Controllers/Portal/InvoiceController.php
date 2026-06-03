@@ -32,7 +32,7 @@ class InvoiceController extends Controller
         $client  = auth()->user()->client;
         $invoice = Invoice::withoutGlobalScopes()
             ->where('client_id', $client->id)
-            ->with(['legalCase', 'payments'])
+            ->with(['legalCase', 'payments', 'installmentPlan.installments'])
             ->findOrFail($id);
 
         $gateways = PaymentGateway::withoutGlobalScopes()
@@ -110,7 +110,7 @@ class InvoiceController extends Controller
         $client  = auth()->user()->client;
         $invoice = Invoice::withoutGlobalScopes()
             ->where('client_id', $client->id)
-            ->with(['legalCase', 'payments'])
+            ->with(['legalCase', 'payments', 'installmentPlan.installments'])
             ->findOrFail($id);
 
         // Handle redirect callbacks (Moyasar, Paymob, etc.)

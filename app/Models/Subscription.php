@@ -20,6 +20,7 @@ class Subscription extends Model
             'current_period_start' => 'datetime',
             'current_period_end'   => 'datetime',
             'cancelled_at'         => 'datetime',
+            'grace_ends_at'        => 'datetime',
         ];
     }
 
@@ -52,13 +53,33 @@ class Subscription extends Model
             && $this->trial_ends_at->isFuture();
     }
 
+    public function onGracePeriod(): bool
+    {
+        return $this->status === 'expired'
+            && $this->grace_ends_at
+            && $this->grace_ends_at->isFuture();
+    }
+
     public function isUsable(): bool
     {
-        return $this->isActive() || $this->onTrial();
+        return $this->isActive() || $this->onTrial() || $this->onGracePeriod();
+    }
+
+    public function graceDaysLeft(): int
+    {
+        if (! $this->onGracePeriod()) {
+            return 0;
+        }
+
+        return (int) ceil(now()->diffInDays($this->grace_ends_at, false));
     }
 
     public function daysLeft(): int
     {
+        if ($this->onGracePeriod()) {
+            return 0;
+        }
+
         $end = $this->onTrial() ? $this->trial_ends_at : $this->current_period_end;
 
         if (! $end || $end->isPast()) {
@@ -75,7 +96,7 @@ class Subscription extends Model
             'active'    => 'نشط',
             'past_due'  => 'متأخر السداد',
             'cancelled' => 'ملغى',
-            'expired'   => 'منتهٍ',
+            'expired'   => $this->onGracePeriod() ? 'فترة السماح' : 'منتهٍ',
             default     => $this->status,
         };
     }

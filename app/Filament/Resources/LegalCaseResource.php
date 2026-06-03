@@ -207,6 +207,18 @@ class LegalCaseResource extends Resource
                     ->visible(fn ($record) => !in_array($record->status, ['closed', 'archived']))
                     ->requiresConfirmation()
                     ->action(fn ($record) => $record->update(['status' => 'closed', 'closed_at' => now()])),
+                Tables\Actions\Action::make('court_sync')
+                    ->label(__('addons.court_sync'))
+                    ->icon('heroicon-o-building-library')
+                    ->color('gray')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('court-sync') ?? false)
+                    ->action(function (LegalCase $record) {
+                        $result = app(\App\Services\Court\CourtSyncService::class)->fetchCaseStatus($record->case_number);
+                        ($result['configured'] ?? false)
+                            ? Notification::make()->title($result['message'])->success()->send()
+                            : Notification::make()->title(__('addons.court_not_configured'))->warning()->send();
+                    }),
+
                 Tables\Actions\Action::make('pdf_report')
                     ->label('تقرير PDF')
                     ->icon('heroicon-o-document-arrow-down')
@@ -239,6 +251,31 @@ class LegalCaseResource extends Resource
                             Notification::make()->title(__('ai.request_queued'))->success()->send();
                         }),
                 ])->label(__('ai.ai_analysis'))->icon('heroicon-o-sparkles'),
+
+                Tables\Actions\Action::make('ai_draft_memo')
+                    ->label(__('addons.ai_draft_memo'))
+                    ->icon('heroicon-o-document-text')
+                    ->color('info')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('advanced-ai') ?? false)
+                    ->requiresConfirmation()
+                    ->action(function (LegalCase $record) {
+                        if (! \App\Filament\Resources\DocumentResource::guardAi()) return;
+                        AIProcessJob::dispatch($record, 'draft_memo', 'ar', auth()->id());
+                        Notification::make()->title(__('ai.request_queued'))->success()->send();
+                    }),
+
+                Tables\Actions\Action::make('ai_predict_outcome')
+                    ->label(__('addons.ai_predict'))
+                    ->icon('heroicon-o-presentation-chart-line')
+                    ->color('info')
+                    ->visible(fn () => auth()->user()?->office?->hasAddon('ai-case-predict') ?? false)
+                    ->requiresConfirmation()
+                    ->modalDescription(__('addons.ai_predict_disclaimer'))
+                    ->action(function (LegalCase $record) {
+                        if (! \App\Filament\Resources\DocumentResource::guardAi()) return;
+                        AIProcessJob::dispatch($record, 'predict_outcome', 'ar', auth()->id());
+                        Notification::make()->title(__('ai.request_queued'))->success()->send();
+                    }),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
@@ -264,5 +301,35 @@ class LegalCaseResource extends Resource
         return parent::getEloquentQuery()
             ->with(['client', 'lawyers'])
             ->withoutGlobalScopes([\Illuminate\Database\Eloquent\SoftDeletingScope::class]);
+    }
+
+    /**
+     * Global search must NOT surface soft-deleted cases (getEloquentQuery drops the
+     * SoftDeletingScope for the trashed-filter UI); re-add it here. Office scope is
+     * preserved by the model's global 'office' scope.
+     */
+    public static function getGlobalSearchEloquentQuery(): \Illuminate\Database\Eloquent\Builder
+    {
+        return parent::getEloquentQuery()->with(['client', 'lawyers']);
+    }
+
+    /**
+     * Append-only relation-manager registry (shared foundation).
+     * Features MUST append to this array — never replace it. Wrap addon-gated
+     * managers in an Office::hasAddon(...) check; core managers are unconditional.
+     */
+    public static function getRelations(): array
+    {
+        $office = auth()->user()?->office;
+
+        return array_filter([
+            \App\Filament\Resources\LegalCaseResource\RelationManagers\TasksRelationManager::class, // tasks (core)
+            \App\Filament\RelationManagers\CommunicationLogsRelationManager::class,                 // comm_log (core)
+            $office?->hasAddon('time-billing')                                                      // time-billing (addon)
+                ? \App\Filament\Resources\LegalCaseResource\RelationManagers\TimeEntriesRelationManager::class : null,
+            $office?->hasAddon('legal-deadlines')                                                   // deadline_calc (addon)
+                ? \App\Filament\Resources\LegalCaseResource\RelationManagers\DeadlinesRelationManager::class : null,
+            // ai_predict (addon)      => hasAddon('ai-case-predict') ? PredictionsRelationManager::class : null,
+        ]);
     }
 }

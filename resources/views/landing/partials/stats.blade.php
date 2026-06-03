@@ -22,10 +22,10 @@
             <h2 class="text-3xl sm:text-4xl font-bold text-white mb-4" style="font-family:'Playfair Display',serif;" x-text="lang==='ar'?'إنجازاتنا بالأرقام':'Our Achievements'"></h2>
         </div>
 
-        <div class="grid grid-cols-2 lg:grid-cols-{{ count($stats) }} gap-8">
+        <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-8">
             @foreach($stats as $i => $stat)
             <div class="text-center scroll-animate opacity-0" style="animation-delay:{{ $i * 0.1 }}s;">
-                <div class="text-5xl font-bold text-gold mb-2">
+                <div class="text-5xl font-bold text-gold mb-2" dir="ltr" style="unicode-bidi:isolate;">
                     <span data-counter="{{ $stat['value'] }}">0</span>{{ $stat['suffix'] ?? '+' }}
                 </div>
                 <div class="text-gray-300 text-sm"

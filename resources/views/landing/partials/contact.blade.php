@@ -9,102 +9,134 @@ $socials = [
     'tiktok'    => ['icon' => 'M12.525.02c1.31-.02 2.61-.01 3.91-.02.08 1.53.63 3.09 1.75 4.17 1.12 1.11 2.7 1.62 4.24 1.79v4.03c-1.44-.05-2.89-.35-4.2-.97-.57-.26-1.1-.59-1.62-.93-.01 2.92.01 5.84-.02 8.75-.08 1.4-.54 2.79-1.35 3.94-1.31 1.92-3.58 3.17-5.91 3.21-1.43.08-2.86-.31-4.08-1.03-2.02-1.19-3.44-3.37-3.65-5.71-.02-.5-.03-1-.01-1.49.18-1.9 1.12-3.72 2.58-4.96 1.66-1.44 3.98-2.13 6.15-1.72.02 1.48-.04 2.96-.04 4.44-.99-.32-2.15-.23-3.02.37-.63.41-1.11 1.04-1.36 1.75-.21.51-.15 1.07-.14 1.61.24 1.64 1.82 3.02 3.5 2.87 1.12-.01 2.19-.66 2.77-1.61.19-.33.4-.67.41-1.06.1-1.79.06-3.57.07-5.36.01-4.03-.01-8.05.02-12.07z', 'url' => $contact['tiktok'] ?? null],
 ];
 $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
+
+$mapSrc     = $contact['map_embed_src'] ?? null;
+$addressQ   = rawurlencode($contact['address_en'] ?? $contact['address_ar'] ?? '');
+$fallbackSrc = $addressQ ? "https://maps.google.com/maps?q={$addressQ}&output=embed" : null;
+$finalMapSrc = $mapSrc ?: $fallbackSrc;
 @endphp
 
-<section id="contact" class="py-24 bg-gray-50 dark:bg-gray-900">
+<section id="contact" class="py-24 bg-white dark:bg-gray-950">
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-        <!-- Section header -->
+        {{-- Section header --}}
         <div class="text-center mb-16 scroll-animate opacity-0">
-            <span class="inline-block text-gold font-semibold text-sm uppercase tracking-widest mb-3" x-text="lang==='ar'?'نحن هنا':'We Are Here'"></span>
-            <h2 class="text-3xl sm:text-4xl font-bold text-navy dark:text-white mb-4" style="font-family:'Playfair Display',serif;" x-text="lang==='ar'?'تواصل معنا':'Get in Touch'"></h2>
-            <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto" x-text="lang==='ar'?'نوفر استشارة قانونية أولية مجانية. تواصل معنا اليوم':'We offer a free initial legal consultation. Contact us today'"></p>
+            <span class="inline-block text-gold font-semibold text-sm uppercase tracking-widest mb-3"
+                  x-text="lang==='ar'?'نحن هنا':'We Are Here'"></span>
+            <h2 class="text-3xl sm:text-4xl font-bold text-navy dark:text-white mb-4"
+                style="font-family:'Playfair Display',serif;"
+                x-text="lang==='ar'?'تواصل معنا':'Get in Touch'"></h2>
+            <p class="text-gray-500 dark:text-gray-400 max-w-xl mx-auto"
+               x-text="lang==='ar'?'نوفر استشارة قانونية أولية مجانية. تواصل معنا اليوم':'We offer a free initial legal consultation. Contact us today'"></p>
         </div>
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+        {{-- Main card --}}
+        <div class="rounded-3xl overflow-hidden shadow-2xl shadow-navy/10 dark:shadow-black/40 scroll-animate opacity-0">
+            <div class="grid grid-cols-1 lg:grid-cols-5">
 
-            <!-- Contact info -->
-            <div class="space-y-8 scroll-animate opacity-0">
-                <div>
-                    <h3 class="text-xl font-bold text-navy dark:text-white mb-6" x-text="lang==='ar'?'معلومات التواصل':'Contact Information'"></h3>
+                {{-- ===== Contact Info Panel (navy bg) ===== --}}
+                <div class="lg:col-span-2 bg-navy relative flex flex-col justify-between p-8 sm:p-10 overflow-hidden">
 
-                    <div class="space-y-5">
-                        @if(!empty($contact['address_ar']))
-                        <div class="flex items-start gap-4">
-                            <div class="w-11 h-11 rounded-xl bg-navy/5 dark:bg-navy/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/></svg>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-navy dark:text-white text-sm" x-text="lang==='ar'?'العنوان':'Address'"></div>
-                                <div class="text-gray-500 dark:text-gray-400 text-sm mt-1"
-                                    x-text="lang==='ar' ? '{{ addslashes($contact['address_ar']) }}' : '{{ addslashes($contact['address_en'] ?? $contact['address_ar']) }}'">
+                    {{-- Decorative circles --}}
+                    <div class="absolute -top-16 -end-16 w-56 h-56 rounded-full bg-white/5 pointer-events-none"></div>
+                    <div class="absolute -bottom-20 -start-10 w-72 h-72 rounded-full bg-white/5 pointer-events-none"></div>
+
+                    <div class="relative z-10">
+                        <h3 class="text-2xl font-bold text-white mb-2"
+                            x-text="lang==='ar'?'معلومات التواصل':'Contact Information'"></h3>
+                        <p class="text-white/50 text-sm mb-8"
+                           x-text="lang==='ar'?'تواصل معنا عبر أي من القنوات التالية':'Reach us through any of the following channels'"></p>
+
+                        <div class="space-y-6">
+                            @if(!empty($contact['phone']))
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white/50 text-xs mb-0.5" x-text="lang==='ar'?'الهاتف':'Phone'"></div>
+                                    <a href="tel:{{ $contact['phone'] }}" class="text-white text-sm font-medium hover:text-gold transition-colors" dir="ltr">{{ $contact['phone'] }}</a>
+                                    @if(!empty($contact['phone2']))
+                                    <a href="tel:{{ $contact['phone2'] }}" class="text-white/70 text-sm block hover:text-gold transition-colors" dir="ltr">{{ $contact['phone2'] }}</a>
+                                    @endif
                                 </div>
                             </div>
-                        </div>
-                        @endif
+                            @endif
 
-                        @if(!empty($contact['phone']))
-                        <div class="flex items-start gap-4">
-                            <div class="w-11 h-11 rounded-xl bg-navy/5 dark:bg-navy/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"/></svg>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-navy dark:text-white text-sm" x-text="lang==='ar'?'الهاتف':'Phone'"></div>
-                                <a href="tel:{{ $contact['phone'] }}" class="text-gray-500 dark:text-gray-400 text-sm mt-1 block hover:text-gold transition-colors" dir="ltr">{{ $contact['phone'] }}</a>
-                                @if(!empty($contact['phone2']))
-                                <a href="tel:{{ $contact['phone2'] }}" class="text-gray-500 dark:text-gray-400 text-sm block hover:text-gold transition-colors" dir="ltr">{{ $contact['phone2'] }}</a>
-                                @endif
-                            </div>
-                        </div>
-                        @endif
-
-                        @if(!empty($contact['email']))
-                        <div class="flex items-start gap-4">
-                            <div class="w-11 h-11 rounded-xl bg-navy/5 dark:bg-navy/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-navy dark:text-white text-sm" x-text="lang==='ar'?'البريد الإلكتروني':'Email'"></div>
-                                <a href="mailto:{{ $contact['email'] }}" class="text-gray-500 dark:text-gray-400 text-sm mt-1 block hover:text-gold transition-colors" dir="ltr">{{ $contact['email'] }}</a>
-                            </div>
-                        </div>
-                        @endif
-
-                        @if(!empty($contact['working_hours_ar']))
-                        <div class="flex items-start gap-4">
-                            <div class="w-11 h-11 rounded-xl bg-navy/5 dark:bg-navy/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
-                            </div>
-                            <div>
-                                <div class="font-semibold text-navy dark:text-white text-sm" x-text="lang==='ar'?'ساعات العمل':'Working Hours'"></div>
-                                <div class="text-gray-500 dark:text-gray-400 text-sm mt-1"
-                                    x-text="lang==='ar' ? '{{ addslashes($contact['working_hours_ar']) }}' : '{{ addslashes($contact['working_hours_en'] ?? $contact['working_hours_ar']) }}'">
+                            @if(!empty($contact['email']))
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white/50 text-xs mb-0.5" x-text="lang==='ar'?'البريد الإلكتروني':'Email'"></div>
+                                    <a href="mailto:{{ $contact['email'] }}" class="text-white text-sm font-medium hover:text-gold transition-colors" dir="ltr">{{ $contact['email'] }}</a>
                                 </div>
                             </div>
-                        </div>
-                        @endif
+                            @endif
 
-                        @if(!empty($contact['whatsapp']))
-                        <div class="flex items-start gap-4">
-                            <div class="w-11 h-11 rounded-xl bg-navy/5 dark:bg-navy/30 flex items-center justify-center flex-shrink-0">
-                                <svg class="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/></svg>
+                            @if(!empty($contact['whatsapp']))
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gold" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white/50 text-xs mb-0.5">WhatsApp</div>
+                                    <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $contact['whatsapp']) }}" target="_blank"
+                                       class="text-white text-sm font-medium hover:text-gold transition-colors" dir="ltr">{{ $contact['whatsapp'] }}</a>
+                                </div>
                             </div>
-                            <div>
-                                <div class="font-semibold text-navy dark:text-white text-sm">WhatsApp</div>
-                                <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $contact['whatsapp']) }}" target="_blank" class="text-gray-500 dark:text-gray-400 text-sm mt-1 block hover:text-gold transition-colors" dir="ltr">{{ $contact['whatsapp'] }}</a>
+                            @endif
+
+                            @if(!empty($contact['address_ar']))
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0 mt-0.5">
+                                    <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"/>
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white/50 text-xs mb-0.5" x-text="lang==='ar'?'العنوان':'Address'"></div>
+                                    <div class="text-white text-sm font-medium leading-relaxed"
+                                         x-text="lang==='ar' ? '{{ addslashes($contact['address_ar']) }}' : '{{ addslashes($contact['address_en'] ?? $contact['address_ar']) }}'">
+                                    </div>
+                                </div>
                             </div>
+                            @endif
+
+                            @if(!empty($contact['working_hours_ar']))
+                            <div class="flex items-center gap-4">
+                                <div class="w-10 h-10 rounded-xl bg-white/10 flex items-center justify-center flex-shrink-0">
+                                    <svg class="w-5 h-5 text-gold" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                                    </svg>
+                                </div>
+                                <div>
+                                    <div class="text-white/50 text-xs mb-0.5" x-text="lang==='ar'?'ساعات العمل':'Working Hours'"></div>
+                                    <div class="text-white text-sm font-medium"
+                                         x-text="lang==='ar' ? '{{ addslashes($contact['working_hours_ar']) }}' : '{{ addslashes($contact['working_hours_en'] ?? $contact['working_hours_ar']) }}'">
+                                    </div>
+                                </div>
+                            </div>
+                            @endif
                         </div>
-                        @endif
                     </div>
 
-                    <!-- Social media -->
+                    {{-- Social links --}}
                     @if(count($activeSocials) > 0)
-                    <div class="mt-8">
-                        <div class="font-semibold text-navy dark:text-white text-sm mb-3" x-text="lang==='ar'?'تابعنا على':'Follow Us'"></div>
-                        <div class="flex gap-3 flex-wrap">
+                    <div class="relative z-10 mt-10 pt-8 border-t border-white/10">
+                        <div class="text-white/50 text-xs mb-3" x-text="lang==='ar'?'تابعنا على':'Follow Us'"></div>
+                        <div class="flex gap-2 flex-wrap">
                             @foreach($activeSocials as $platform => $social)
                             <a href="{{ $social['url'] }}" target="_blank" rel="noopener"
-                               class="w-9 h-9 rounded-full bg-navy/5 dark:bg-navy/30 hover:bg-gold hover:text-white flex items-center justify-center transition-colors text-navy dark:text-gray-400">
+                               class="w-9 h-9 rounded-full bg-white/10 hover:bg-gold flex items-center justify-center transition-all duration-200 text-white">
                                 <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                                     <path d="{{ $social['icon'] }}"/>
                                 </svg>
@@ -115,106 +147,140 @@ $activeSocials = array_filter($socials, fn($s) => !empty($s['url']));
                     @endif
                 </div>
 
-                <!-- Interactive Map — OpenStreetMap (no API key required) -->
-                <div class="rounded-2xl overflow-hidden border border-navy/10 dark:border-navy/30 h-56">
-                    <iframe
-                        src="https://www.openstreetmap.org/export/embed.html?bbox=31.4721%2C30.5577%2C31.5321%2C30.6177&layer=mapnik&marker=30.5877%2C31.5021"
-                        width="100%"
-                        height="100%"
-                        style="border:0;"
-                        loading="lazy"
-                        referrerpolicy="no-referrer-when-downgrade"
-                        title="موقع مكتب عامر للمحاماة — الزقازيق"
-                    ></iframe>
-                </div>
-            </div>
-
-            <!-- Contact Form -->
-            <div
-                x-data="{
-                    form: { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' },
-                    loading: false,
-                    success: false,
-                    error: '',
-                    async submit() {
-                        this.loading = true;
-                        this.error = '';
-                        try {
-                            const res = await fetch('{{ route('contact') }}', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                    'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
-                                    'Accept': 'application/json'
-                                },
-                                body: JSON.stringify(this.form)
-                            });
-                            const data = await res.json();
-                            if (data.success) {
-                                this.success = true;
-                                this.form = { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' };
-                            } else {
-                                this.error = data.message || (lang === 'ar' ? 'حدث خطأ، حاول مرة أخرى' : 'An error occurred, please try again');
+                {{-- ===== Contact Form Panel ===== --}}
+                <div
+                    x-data="{
+                        form: { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' },
+                        loading: false,
+                        success: false,
+                        error: '',
+                        async submit() {
+                            this.loading = true;
+                            this.error = '';
+                            try {
+                                const res = await fetch('{{ route('contact') }}', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json',
+                                        'X-CSRF-TOKEN': document.querySelector('meta[name=csrf-token]').content,
+                                        'Accept': 'application/json'
+                                    },
+                                    body: JSON.stringify(this.form)
+                                });
+                                const data = await res.json();
+                                if (data.success) {
+                                    this.success = true;
+                                    this.form = { name: '', email: '', phone: '', subject: '', message: '', office_slug: '{{ $officeSlug ?? '' }}' };
+                                } else {
+                                    this.error = data.message || (lang === 'ar' ? 'حدث خطأ، حاول مرة أخرى' : 'An error occurred, please try again');
+                                }
+                            } catch(e) {
+                                this.error = lang === 'ar' ? 'فشل الاتصال بالخادم' : 'Connection failed, please try again';
                             }
-                        } catch(e) {
-                            this.error = lang === 'ar' ? 'فشل الاتصال بالخادم' : 'Connection failed, please try again';
+                            this.loading = false;
                         }
-                        this.loading = false;
-                    }
-                }"
-                class="bg-white dark:bg-gray-800 rounded-2xl p-8 shadow-sm scroll-animate opacity-0"
-                style="animation-delay:0.1s;"
-            >
-                <!-- Success state -->
-                <div x-show="success" x-cloak class="text-center py-10">
-                    <div class="w-16 h-16 rounded-full bg-green-100 flex items-center justify-center mx-auto mb-4">
-                        <svg class="w-8 h-8 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                    }"
+                    class="lg:col-span-3 bg-white dark:bg-gray-900 p-8 sm:p-10"
+                >
+                    {{-- Success state --}}
+                    <div x-show="success" x-cloak class="h-full flex flex-col items-center justify-center text-center py-16">
+                        <div class="w-20 h-20 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mx-auto mb-5">
+                            <svg class="w-10 h-10 text-green-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/>
+                            </svg>
+                        </div>
+                        <h3 class="text-2xl font-bold text-navy dark:text-white mb-3"
+                            x-text="lang==='ar'?'تم الإرسال بنجاح!':'Message Sent Successfully!'"></h3>
+                        <p class="text-gray-500 dark:text-gray-400 text-sm mb-6 max-w-xs"
+                           x-text="lang==='ar'?'سيتواصل معك فريقنا في أقرب وقت ممكن':'Our team will contact you as soon as possible'"></p>
+                        <button @click="success=false"
+                                class="px-5 py-2.5 rounded-xl border border-navy/20 dark:border-white/20 text-navy dark:text-white text-sm font-medium hover:bg-navy hover:text-white dark:hover:bg-white dark:hover:text-navy transition-all"
+                                x-text="lang==='ar'?'إرسال رسالة أخرى':'Send Another Message'"></button>
                     </div>
-                    <h3 class="text-xl font-bold text-navy dark:text-white mb-2" x-text="lang==='ar'?'تم الإرسال بنجاح!':'Message Sent Successfully!'"></h3>
-                    <p class="text-gray-500 dark:text-gray-400 text-sm mb-6" x-text="lang==='ar'?'سيتواصل معك فريقنا في أقرب وقت ممكن':'Our team will contact you as soon as possible'"></p>
-                    <button @click="success=false" class="text-gold hover:underline text-sm" x-text="lang==='ar'?'إرسال رسالة أخرى':'Send Another Message'"></button>
+
+                    {{-- Form --}}
+                    <form x-show="!success" @submit.prevent="submit()" class="h-full flex flex-col">
+                        <div class="mb-7">
+                            <h3 class="text-2xl font-bold text-navy dark:text-white mb-1"
+                                x-text="lang==='ar'?'أرسل رسالتك':'Send Your Message'"></h3>
+                            <p class="text-gray-400 dark:text-gray-500 text-sm"
+                               x-text="lang==='ar'?'سنرد عليك في أقرب وقت ممكن':'We will get back to you as soon as possible'"></p>
+                        </div>
+
+                        <div class="flex-1 space-y-5">
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                                           x-text="lang==='ar'?'الاسم الكامل *':'Full Name *'"></label>
+                                    <input x-model="form.name" type="text" required
+                                           :placeholder="lang==='ar'?'اسمك الكامل':'Your full name'"
+                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                                           x-text="lang==='ar'?'البريد الإلكتروني *':'Email *'"></label>
+                                    <input x-model="form.email" type="email" required
+                                           :placeholder="lang==='ar'?'بريدك الإلكتروني':'your@email.com'"
+                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold transition">
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 sm:grid-cols-2 gap-5">
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                                           x-text="lang==='ar'?'رقم الهاتف (اختياري)':'Phone (Optional)'"></label>
+                                    <input x-model="form.phone" type="tel"
+                                           :placeholder="lang==='ar'?'رقم هاتفك':'+966 5x xxx xxxx'"
+                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold transition">
+                                </div>
+                                <div>
+                                    <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                                           x-text="lang==='ar'?'الموضوع *':'Subject *'"></label>
+                                    <input x-model="form.subject" type="text" required
+                                           :placeholder="lang==='ar'?'موضوع رسالتك':'Message subject'"
+                                           class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold transition">
+                                </div>
+                            </div>
+
+                            <div>
+                                <label class="block text-xs font-semibold text-gray-500 dark:text-gray-400 uppercase tracking-wider mb-2"
+                                       x-text="lang==='ar'?'تفاصيل الاستفسار *':'Message Details *'"></label>
+                                <textarea x-model="form.message" required rows="5"
+                                          :placeholder="lang==='ar'?'اكتب تفاصيل استفساركم أو قضيتكم هنا...':'Write your inquiry or case details here...'"
+                                          class="w-full rounded-xl border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800 px-4 py-3 text-sm text-gray-800 dark:text-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-gold/30 focus:border-gold transition resize-none"></textarea>
+                            </div>
+                        </div>
+
+                        <div x-show="error" x-cloak
+                             class="mt-4 p-3.5 rounded-xl bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-600 dark:text-red-400 text-sm"
+                             x-text="error"></div>
+
+                        <button type="submit" :disabled="loading"
+                                class="mt-6 w-full py-4 rounded-xl bg-navy hover:bg-navy-light text-white font-bold text-sm transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2 shadow-lg shadow-navy/20">
+                            <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/>
+                                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/>
+                            </svg>
+                            <span x-text="loading ? (lang==='ar'?'جاري الإرسال...':'Sending...') : (lang==='ar'?'إرسال الرسالة':'Send Message')"></span>
+                        </button>
+                    </form>
                 </div>
-
-                <!-- Form -->
-                <form x-show="!success" @submit.prevent="submit()">
-                    <h3 class="text-xl font-bold text-navy dark:text-white mb-6" x-text="lang==='ar'?'أرسل رسالتك':'Send Your Message'"></h3>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" x-text="lang==='ar'?'الاسم الكامل *':'Full Name *'"></label>
-                            <input x-model="form.name" type="text" required :placeholder="lang==='ar'?'اسمك الكامل':'Your full name'" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" x-text="lang==='ar'?'البريد الإلكتروني *':'Email *'"></label>
-                            <input x-model="form.email" type="email" required :placeholder="lang==='ar'?'بريدك الإلكتروني':'your@email.com'" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition">
-                        </div>
-                    </div>
-
-                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" x-text="lang==='ar'?'رقم الهاتف':'Phone Number'"></label>
-                            <input x-model="form.phone" type="tel" :placeholder="lang==='ar'?'رقم هاتفك':'+966 5x xxx xxxx'" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition">
-                        </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" x-text="lang==='ar'?'موضوع الاستفسار *':'Subject *'"></label>
-                            <input x-model="form.subject" type="text" required :placeholder="lang==='ar'?'موضوع رسالتك':'Message subject'" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition">
-                        </div>
-                    </div>
-
-                    <div class="mb-5">
-                        <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1.5" x-text="lang==='ar'?'تفاصيل الاستفسار *':'Message Details *'"></label>
-                        <textarea x-model="form.message" required rows="4" :placeholder="lang==='ar'?'اكتب تفاصيل استفساركم أو قضيتكم هنا...':'Write your inquiry or case details here...'" class="w-full rounded-xl border border-gray-200 dark:border-gray-600 bg-gray-50 dark:bg-gray-700 px-4 py-2.5 text-sm text-gray-800 dark:text-gray-200 focus:outline-none focus:ring-2 focus:ring-gold/40 focus:border-gold transition resize-none"></textarea>
-                    </div>
-
-                    <div x-show="error" x-cloak class="mb-4 p-3 rounded-xl bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400 text-sm" x-text="error"></div>
-
-                    <button type="submit" :disabled="loading" class="w-full py-3.5 rounded-xl bg-navy hover:bg-navy-light text-white font-semibold text-sm transition-all duration-300 disabled:opacity-60 flex items-center justify-center gap-2">
-                        <svg x-show="loading" class="w-4 h-4 animate-spin" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"/><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"/></svg>
-                        <span x-text="loading ? (lang==='ar'?'جاري الإرسال...':'Sending...') : (lang==='ar'?'إرسال الرسالة':'Send Message')"></span>
-                    </button>
-                </form>
             </div>
 
+            {{-- Map strip at bottom --}}
+            @if($finalMapSrc)
+            <div class="h-64 lg:h-72">
+                <iframe
+                    src="{{ $finalMapSrc }}"
+                    width="100%"
+                    height="100%"
+                    style="border:0; display:block;"
+                    loading="lazy"
+                    referrerpolicy="no-referrer-when-downgrade"
+                ></iframe>
+            </div>
+            @endif
         </div>
+
     </div>
 </section>
