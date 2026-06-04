@@ -3,11 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <style>
-    @php $amiriPath = str_replace('\\', '/', public_path('fonts/Amiri-Regular.ttf')); $amiriBoldPath = str_replace('\\', '/', public_path('fonts/Amiri-Bold.ttf')); @endphp
-    @if(file_exists(public_path('fonts/Amiri-Regular.ttf')))
-    @font-face { font-family: 'Amiri'; font-style: normal; font-weight: normal; src: url('{{ $amiriPath }}') format('truetype'); }
-    @font-face { font-family: 'Amiri'; font-style: normal; font-weight: bold; src: url('{{ $amiriBoldPath }}') format('truetype'); }
-    @endif
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { direction: rtl; text-align: right; }
     body {
