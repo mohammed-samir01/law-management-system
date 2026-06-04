@@ -312,11 +312,11 @@
 
             if (targetElement) {
                 e.preventDefault();
-                targetElement.scrollIntoView({ behavior: 'smooth' });
-                // Remove hash from URL after scroll completes
-                setTimeout(() => {
-                    window.history.replaceState(null, '', window.location.pathname);
-                }, 100);
+                // Manual smooth scroll calculation
+                const targetPosition = targetElement.getBoundingClientRect().top + window.scrollY - 80;
+                window.scrollTo({ top: targetPosition, behavior: 'smooth' });
+                // Keep URL clean
+                window.history.replaceState(null, '', window.location.pathname);
             }
         });
     </script>
