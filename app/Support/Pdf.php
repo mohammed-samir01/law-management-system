@@ -9,10 +9,10 @@ use Mpdf\Mpdf;
  * Central PDF renderer using mPDF — which natively shapes Arabic letters and
  * applies RTL bidi (unlike DomPDF). Renders a Blade view to PDF bytes.
  *
- * Uses mPDF's bundled "XB Riyaz" Arabic font (parses cleanly and shapes
- * correctly). The Blade views' Amiri @font-face blocks are stripped before
- * rendering — Amiri's OpenType tables aren't supported by mPDF's font parser,
- * and unmatched font-family names fall back to the default font below.
+ * Uses the modern "Tajawal" Arabic font (same family as the web UI) for a
+ * clean, professional look. The TTFs live in resources/fonts and are
+ * registered with mPDF below. The Blade views' @font-face blocks are stripped
+ * before rendering — mPDF resolves fonts via its own registry, not @font-face.
  */
 class Pdf
 {
@@ -20,7 +20,7 @@ class Pdf
     {
         $html = View::make($view, $data)->render();
 
-        // Drop @font-face blocks (Amiri) — mPDF can't parse them; we use xbriyaz.
+        // Drop @font-face blocks — mPDF resolves fonts via its registry below.
         $html = preg_replace('/@font-face\s*\{[^}]*\}/i', '', $html);
 
         $tmp = storage_path('app/mpdf-tmp');
@@ -28,15 +28,37 @@ class Pdf
             @mkdir($tmp, 0775, true);
         }
 
+        // Register the bundled Tajawal font alongside mPDF's defaults.
+        $defaultFontDir  = (new \Mpdf\Config\ConfigVariables())->getDefaults()['fontDir'];
+        $defaultFontData = (new \Mpdf\Config\FontVariables())->getDefaults()['fontdata'];
+
         $mpdf = new Mpdf([
             'mode'             => 'utf-8',
             'format'           => 'A4',
             'directionality'   => 'rtl',
-            'default_font'     => 'xbriyaz',
+            'default_font'     => 'tajawal',
             'default_font_size' => 11,
             'tempDir'          => $tmp,
-            'autoScriptToLang' => true,
-            'autoLangToFont'   => true,
+            'fontDir'          => array_merge($defaultFontDir, [resource_path('fonts')]),
+            'fontdata'         => $defaultFontData + [
+                // Tajawal + an "amiri" alias so the templates' font-family:'Amiri'
+                // declarations resolve to Tajawal instead of falling back to DejaVu.
+                'tajawal' => [
+                    'R'          => 'Tajawal-Regular.ttf',
+                    'B'          => 'Tajawal-Bold.ttf',
+                    'useOTL'     => 0xFF,
+                    'useKashida' => 75,
+                ],
+                'amiri' => [
+                    'R'          => 'Tajawal-Regular.ttf',
+                    'B'          => 'Tajawal-Bold.ttf',
+                    'useOTL'     => 0xFF,
+                    'useKashida' => 75,
+                ],
+            ],
+            // Off, so our Tajawal font (not mPDF's bundled xbriyaz) shapes the Arabic.
+            'autoScriptToLang' => false,
+            'autoLangToFont'   => false,
             'margin_top'       => 12,
             'margin_bottom'    => 12,
             'margin_left'      => 12,

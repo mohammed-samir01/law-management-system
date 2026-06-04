@@ -11,7 +11,7 @@
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { direction: rtl; text-align: right; }
     body {
-        font-family: {{ file_exists(public_path('fonts/Amiri-Regular.ttf')) ? "'Amiri'" : "'DejaVu Sans'" }}, sans-serif;
+        font-family: 'tajawal', sans-serif;
         font-size: 14px; color: #1e293b; background: #fff;
     }
     .page { padding: 50px 45px; }

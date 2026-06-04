@@ -25,7 +25,7 @@
         text-align: right;
     }
     body {
-        font-family: {{ file_exists(public_path('fonts/Amiri-Regular.ttf')) ? "'Amiri'" : "'DejaVu Sans'" }}, sans-serif;
+        font-family: 'tajawal', sans-serif;
         font-size: 14px;
         color: #1e293b;
         background: #fff;

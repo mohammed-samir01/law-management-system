@@ -10,7 +10,7 @@
     @endif
     * { box-sizing: border-box; margin: 0; padding: 0; }
     html, body { direction: rtl; text-align: right; }
-    body { font-family: {{ file_exists(public_path('fonts/Amiri-Regular.ttf')) ? "'Amiri'" : "'DejaVu Sans'" }}, sans-serif; font-size: 14px; color: #1e293b; }
+    body { font-family: 'tajawal', sans-serif; font-size: 14px; color: #1e293b; }
     .page { padding: 50px 45px; }
     .header { border-bottom: 3px solid #1E3A5F; padding-bottom: 16px; margin-bottom: 24px; }
     .office-name { font-size: 20px; font-weight: bold; color: #1E3A5F; }
