@@ -301,7 +301,7 @@
     </a>
     @endif
 
-    <!-- Smooth scroll without hash URLs -->
+    <!-- Smooth scroll without hash URLs (clean history) -->
     <script>
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href^="#"]');
@@ -313,6 +313,7 @@
             if (targetElement) {
                 e.preventDefault();
                 targetElement.scrollIntoView({ behavior: 'smooth' });
+                window.history.replaceState(null, '', window.location.pathname);
             }
         });
     </script>
