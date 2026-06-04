@@ -500,5 +500,39 @@
 </div>
 @endif
 
+<!-- Smooth scroll for same-page anchors, keeping the URL clean (no #hash) -->
+<script>
+    function mizanScrollToHash(hash, smooth) {
+        const target = document.getElementById(hash);
+        if (!target) return false;
+        const top = target.getBoundingClientRect().top + window.scrollY - 80;
+        window.scrollTo({ top: top, behavior: smooth ? 'smooth' : 'auto' });
+        window.history.replaceState(null, '', window.location.pathname + window.location.search);
+        return true;
+    }
+
+    // Intercept clicks on links that point to a section on the current page
+    document.addEventListener('click', (e) => {
+        const link = e.target.closest('a[href]');
+        if (!link) return;
+
+        const url = new URL(link.href, window.location.href);
+        if (!url.hash) return;
+        // Only handle in-page links (same path); let real navigations happen
+        if (url.pathname !== window.location.pathname) return;
+
+        if (mizanScrollToHash(url.hash.substring(1), true)) {
+            e.preventDefault();
+        }
+    });
+
+    // If the page loads with a #hash (e.g. arriving from another page), scroll then clean the URL
+    window.addEventListener('load', () => {
+        if (window.location.hash) {
+            mizanScrollToHash(window.location.hash.substring(1), false);
+        }
+    });
+</script>
+
 </body>
 </html>
