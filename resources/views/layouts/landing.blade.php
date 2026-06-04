@@ -301,5 +301,21 @@
     </a>
     @endif
 
+    <!-- Smooth scroll without hash URLs -->
+    <script>
+        document.addEventListener('click', (e) => {
+            const link = e.target.closest('a[href^="#"]');
+            if (!link) return;
+
+            const targetId = link.getAttribute('href').substring(1);
+            const targetElement = document.getElementById(targetId);
+
+            if (targetElement) {
+                e.preventDefault();
+                targetElement.scrollIntoView({ behavior: 'smooth' });
+            }
+        });
+    </script>
+
 </body>
 </html>
