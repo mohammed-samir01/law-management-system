@@ -301,7 +301,7 @@
     </a>
     @endif
 
-    <!-- Smooth scroll without hash URLs (clean history) -->
+    <!-- Smooth scroll without hash URLs -->
     <script>
         document.addEventListener('click', (e) => {
             const link = e.target.closest('a[href^="#"]');
@@ -313,7 +313,10 @@
             if (targetElement) {
                 e.preventDefault();
                 targetElement.scrollIntoView({ behavior: 'smooth' });
-                window.history.replaceState(null, '', window.location.pathname);
+                // Remove hash from URL after scroll completes
+                setTimeout(() => {
+                    window.history.replaceState(null, '', window.location.pathname);
+                }, 100);
             }
         });
     </script>
