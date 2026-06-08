@@ -69,6 +69,15 @@ class OnboardingController extends Controller
             'admin_name'            => ['required', 'string', 'max:255'],
             'admin_email'           => ['required', 'email', 'max:255', 'unique:users,email'],
             'admin_password'        => ['required', 'string', 'min:8', 'confirmed', \Illuminate\Validation\Rules\Password::min(8)->mixedCase()->numbers()->symbols()],
+        ], [], [
+            'office_name_ar'  => 'اسم المكتب (عربي)',
+            'office_name_en'  => 'اسم المكتب (إنجليزي)',
+            'slug'            => 'المعرّف الفريد',
+            'phone'           => 'هاتف المكتب',
+            'email'           => 'إيميل التواصل للمكتب',
+            'admin_name'      => 'اسمك الكامل',
+            'admin_email'     => 'إيميلك (لتسجيل الدخول)',
+            'admin_password'  => 'كلمة المرور',
         ]);
 
         // Everyone starts with a free 30-day trial (full features), regardless of chosen plan.

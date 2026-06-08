@@ -11,7 +11,7 @@
 
         <div class="bg-white rounded-2xl shadow-sm border border-gray-100 p-8"
              x-data="{
-                slug: '',
+                slug: '{{ old('slug', '') }}',
                 password: '',
                 showPassword: false,
                 showConfirm: false,
