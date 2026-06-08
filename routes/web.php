@@ -8,9 +8,13 @@ use App\Http\Controllers\ImageEditorController;
 use App\Http\Controllers\LandingController;
 use App\Http\Controllers\OnboardingController;
 use App\Http\Controllers\Portal\AuthController;
+use App\Http\Controllers\Portal\CaseController as PortalCaseController;
 use App\Http\Controllers\Portal\DashboardController;
-use App\Http\Controllers\PlatformContactController;
+use App\Http\Controllers\Portal\DocumentController as PortalDocumentController;
+use App\Http\Controllers\Portal\HearingController as PortalHearingController;
 use App\Http\Controllers\Portal\InvoiceController;
+use App\Http\Controllers\Portal\TicketController as PortalTicketController;
+use App\Http\Controllers\PlatformContactController;
 use App\Http\Controllers\PwaController;
 use App\Http\Controllers\SaasLandingController;
 use App\Http\Controllers\TelegramWebhookController;
@@ -121,6 +125,24 @@ Route::prefix('portal')->name('portal.')->group(function () {
         Route::post('invoices/{id}/pay', [InvoiceController::class, 'pay'])->name('invoices.pay');
         Route::get('invoices/{id}/pay/success', [InvoiceController::class, 'success'])->name('invoices.pay.success');
         Route::get('invoices/{id}/pay/failed', [InvoiceController::class, 'failed'])->name('invoices.pay.failed');
+
+        // Cases
+        Route::get('cases', [PortalCaseController::class, 'index'])->name('cases.index');
+        Route::get('cases/{id}', [PortalCaseController::class, 'show'])->name('cases.show');
+
+        // Hearings
+        Route::get('hearings', [PortalHearingController::class, 'index'])->name('hearings.index');
+
+        // Documents
+        Route::get('documents', [PortalDocumentController::class, 'index'])->name('documents.index');
+        Route::get('documents/{id}/download', [PortalDocumentController::class, 'download'])->name('documents.download');
+
+        // Support Tickets
+        Route::get('tickets', [PortalTicketController::class, 'index'])->name('tickets.index');
+        Route::get('tickets/create', [PortalTicketController::class, 'create'])->name('tickets.create');
+        Route::post('tickets', [PortalTicketController::class, 'store'])->name('tickets.store');
+        Route::get('tickets/{id}', [PortalTicketController::class, 'show'])->name('tickets.show');
+        Route::post('tickets/{id}/reply', [PortalTicketController::class, 'reply'])->name('tickets.reply');
 
         // PWA (client-pwa addon) — manifest, service worker, generated icons
         Route::get('manifest.webmanifest', [PwaController::class, 'manifest'])->name('pwa.manifest');
