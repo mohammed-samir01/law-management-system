@@ -39,6 +39,11 @@ class OnboardingController extends Controller
 
     public function showSetup()
     {
+        // Already registered — send to dashboard
+        if (Auth::check()) {
+            return redirect('/admin');
+        }
+
         $planId = session('onboarding_plan_id');
 
         if (! $planId) {
@@ -59,6 +64,14 @@ class OnboardingController extends Controller
         }
 
         $plan = Plan::findOrFail($planId);
+
+        // If admin_email already exists → redirect to login instead of showing error
+        $existingUser = User::where('email', $request->admin_email)->first();
+        if ($existingUser) {
+            return back()->withInput()->withErrors([
+                'admin_email' => 'هذا الإيميل مسجّل بالفعل. يمكنك تسجيل الدخول من هنا: ' . url('/admin/login'),
+            ]);
+        }
 
         $validated = $request->validate([
             'office_name_ar'        => ['required', 'string', 'max:255'],
