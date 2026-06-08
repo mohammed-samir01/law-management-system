@@ -46,8 +46,8 @@
 
 ```bash
 # 1. Clone the repository
-git clone https://github.com/YOUR_USERNAME/mizan-legal.git
-cd mizan-legal
+git clone https://github.com/mohammed-samir01/law-management-system-saas.git
+cd law-management-system-saas
 
 # 2. Install PHP dependencies
 composer install --no-dev --optimize-autoloader
