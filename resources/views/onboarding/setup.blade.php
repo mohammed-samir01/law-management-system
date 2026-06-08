@@ -83,13 +83,47 @@
                 </div>
 
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">الهاتف *</label>
-                        <input type="text" name="phone" value="{{ old('phone') }}" required dir="ltr"
-                               class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
+                    {{-- Phone with country code --}}
+                    <div x-data="{
+                        dialCode: '{{ old('dial_code', '+20') }}',
+                        phoneNum: '{{ old('phone_number') }}',
+                        get fullPhone() { return this.dialCode + this.phoneNum; }
+                    }">
+                        <label class="block text-sm font-medium text-gray-700 mb-1">هاتف المكتب *</label>
+                        <div class="flex gap-2">
+                            <select x-model="dialCode"
+                                    class="rounded-lg border border-gray-300 px-2 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none bg-white text-sm w-28 flex-shrink-0"
+                                    dir="ltr">
+                                <option value="+20">🇪🇬 +20</option>
+                                <option value="+966">🇸🇦 +966</option>
+                                <option value="+971">🇦🇪 +971</option>
+                                <option value="+965">🇰🇼 +965</option>
+                                <option value="+974">🇶🇦 +974</option>
+                                <option value="+973">🇧🇭 +973</option>
+                                <option value="+968">🇴🇲 +968</option>
+                                <option value="+962">🇯🇴 +962</option>
+                                <option value="+961">🇱🇧 +961</option>
+                                <option value="+964">🇮🇶 +964</option>
+                                <option value="+218">🇱🇾 +218</option>
+                                <option value="+212">🇲🇦 +212</option>
+                                <option value="+216">🇹🇳 +216</option>
+                                <option value="+213">🇩🇿 +213</option>
+                                <option value="+1">🇺🇸 +1</option>
+                                <option value="+44">🇬🇧 +44</option>
+                            </select>
+                            <input type="tel" x-model="phoneNum"
+                                   placeholder="1001234567"
+                                   required dir="ltr"
+                                   class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
+                        </div>
+                        {{-- Hidden input sends the full number --}}
+                        <input type="hidden" name="phone" :value="fullPhone">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-1">بريد المكتب *</label>
+                        <label class="block text-sm font-medium text-gray-700 mb-1">
+                            إيميل التواصل للمكتب *
+                            <span class="text-xs text-gray-400 font-normal">(يظهر للعملاء)</span>
+                        </label>
                         <input type="email" name="email" value="{{ old('email') }}" required dir="ltr"
                                class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
                     </div>
@@ -106,7 +140,10 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-1">بريدك الإلكتروني *</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1">
+                        إيميلك (لتسجيل الدخول) *
+                        <span class="text-xs text-gray-400 font-normal">(سري — لا يظهر للعملاء)</span>
+                    </label>
                     <input type="email" name="admin_email" value="{{ old('admin_email') }}" required dir="ltr"
                            class="w-full rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
                 </div>
