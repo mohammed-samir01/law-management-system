@@ -91,7 +91,7 @@
                     }">
                         <label class="block text-sm font-medium text-gray-700 mb-1">هاتف المكتب *</label>
                         <div class="flex gap-2" dir="ltr">
-                            <select x-model="dialCode"
+                            <select x-model="dialCode" name="dial_code"
                                     class="rounded-lg border border-gray-300 px-2 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none bg-white text-sm w-28 flex-shrink-0">
                                 <option value="+20">🇪🇬 +20</option>
                                 <option value="+966">🇸🇦 +966</option>
@@ -110,7 +110,7 @@
                                 <option value="+1">🇺🇸 +1</option>
                                 <option value="+44">🇬🇧 +44</option>
                             </select>
-                            <input type="tel" x-model="phoneNum"
+                            <input type="tel" x-model="phoneNum" name="phone_number"
                                    placeholder="1001234567"
                                    required
                                    class="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
