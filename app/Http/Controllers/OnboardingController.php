@@ -64,7 +64,8 @@ class OnboardingController extends Controller
             'office_name_ar'        => ['required', 'string', 'max:255'],
             'office_name_en'        => ['nullable', 'string', 'max:255'],
             'slug'                  => ['required', 'string', 'max:100', 'regex:/^[a-z0-9\-]+$/', Rule::unique('offices', 'slug')->whereNull('deleted_at')],
-            'phone'                 => ['required', 'string', 'max:20'],
+            'dial_code'             => ['required', 'string', 'max:6'],
+            'phone_number'          => ['required', 'string', 'max:15'],
             'email'                 => ['required', 'email', 'max:255', Rule::unique('offices', 'email')->whereNull('deleted_at')],
             'admin_name'            => ['required', 'string', 'max:255'],
             'admin_email'           => ['required', 'email', 'max:255', 'unique:users,email'],
@@ -73,7 +74,8 @@ class OnboardingController extends Controller
             'office_name_ar'  => 'اسم المكتب (عربي)',
             'office_name_en'  => 'اسم المكتب (إنجليزي)',
             'slug'            => 'المعرّف الفريد',
-            'phone'           => 'هاتف المكتب',
+            'dial_code'       => 'كود الدولة',
+            'phone_number'    => 'هاتف المكتب',
             'email'           => 'إيميل التواصل للمكتب',
             'admin_name'      => 'اسمك الكامل',
             'admin_email'     => 'إيميلك (لتسجيل الدخول)',
@@ -94,7 +96,7 @@ class OnboardingController extends Controller
             $office = Office::create([
                 'name'      => ['ar' => $validated['office_name_ar'], 'en' => $validated['office_name_en'] ?? ''],
                 'slug'      => $validated['slug'],
-                'phone'     => $validated['phone'],
+                'phone'     => $validated['dial_code'] . $validated['phone_number'],
                 'email'     => $validated['email'],
                 'is_active' => true,
             ]);
