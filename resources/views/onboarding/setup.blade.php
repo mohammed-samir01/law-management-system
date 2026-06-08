@@ -112,8 +112,8 @@
                             </select>
                             <input type="tel" x-model="phoneNum"
                                    placeholder="1001234567"
-                                   required dir="ltr"
-                                   class="flex-1 rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
+                                   required
+                                   class="flex-1 min-w-0 rounded-lg border border-gray-300 px-3 py-2 focus:border-gold focus:ring-1 focus:ring-gold outline-none">
                         </div>
                         {{-- Hidden input sends the full number --}}
                         <input type="hidden" name="phone" :value="fullPhone">
