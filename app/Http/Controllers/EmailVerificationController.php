@@ -39,10 +39,19 @@ class EmailVerificationController extends Controller
     {
         $user = auth()->user();
 
-        if ($user && ! $user->hasVerifiedEmail()) {
-            $service->sendCode($user);
+        if (! $user || $user->hasVerifiedEmail()) {
+            return redirect('/admin');
         }
 
-        return back()->with('success', 'تم إرسال رمز جديد إلى بريدك.');
+        try {
+            $service->sendCode($user);
+            return back()->with('success', 'تم إرسال رمز جديد. تحقق من Inbox والـ Spam/Junk.');
+        } catch (\Throwable $e) {
+            \Illuminate\Support\Facades\Log::error('OTP resend failed', [
+                'user_id' => $user->id,
+                'error'   => $e->getMessage(),
+            ]);
+            return back()->with('error', 'فشل إرسال الرمز — تحقق من إعدادات البريد في لوحة التحكم أو تواصل مع الدعم.');
+        }
     }
 }

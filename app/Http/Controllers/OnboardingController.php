@@ -143,7 +143,16 @@ class OnboardingController extends Controller
 
         // If email verification is enabled, send OTP and route to verification.
         if (\App\Models\PlatformSetting::get('security.email_verification_enabled', false)) {
-            app(\App\Services\EmailVerificationService::class)->sendCode($user);
+            try {
+                app(\App\Services\EmailVerificationService::class)->sendCode($user);
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::error('OTP send failed on registration', [
+                    'user_id' => $user->id,
+                    'error'   => $e->getMessage(),
+                ]);
+                return redirect()->route('verification.notice')
+                    ->with('warning', 'لم نتمكن من إرسال رمز التحقق. اضغط على "إعادة الإرسال" وتحقق من إعدادات البريد.');
+            }
 
             return redirect()->route('verification.notice');
         }

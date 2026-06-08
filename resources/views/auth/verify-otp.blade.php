@@ -18,9 +18,17 @@
             @if(session('success'))
                 <div class="bg-green-50 border border-green-200 text-green-700 rounded-lg p-3 mb-4 text-sm">{{ session('success') }}</div>
             @endif
+            @if(session('warning'))
+                <div class="bg-yellow-50 border border-yellow-200 text-yellow-700 rounded-lg p-3 mb-4 text-sm">{{ session('warning') }}</div>
+            @endif
             @if(session('error'))
                 <div class="bg-red-50 border border-red-200 text-red-700 rounded-lg p-3 mb-4 text-sm">{{ session('error') }}</div>
             @endif
+
+            {{-- Spam hint --}}
+            <div class="bg-blue-50 border border-blue-100 text-blue-600 rounded-lg p-3 mb-4 text-xs text-start">
+                💡 إذا لم يصلك الرمز خلال دقيقة، تحقق من مجلد <strong>Spam / Junk</strong> في بريدك.
+            </div>
 
             <form method="POST" action="{{ route('verification.verify') }}" class="space-y-4">
                 @csrf
