@@ -33,10 +33,22 @@ class PlatformMailSettingsPage extends Page
 
     public function mount(): void
     {
-        $row = PlatformSetting::singleton();
+        $row        = PlatformSetting::singleton();
+        $mailDb     = $row->mail_config ?? [];
+
+        // Fall back to .env / config values when DB is empty
+        $mailConfig = [
+            'host'         => $mailDb['host']         ?? config('mail.mailers.smtp.host', ''),
+            'port'         => $mailDb['port']         ?? config('mail.mailers.smtp.port', 587),
+            'username'     => $mailDb['username']     ?? config('mail.mailers.smtp.username', ''),
+            'password'     => $mailDb['password']     ?? '',
+            'encryption'   => $mailDb['encryption']   ?? config('mail.mailers.smtp.encryption', 'tls'),
+            'from_address' => $mailDb['from_address'] ?? config('mail.from.address', ''),
+            'from_name'    => $mailDb['from_name']    ?? config('mail.from.name', 'ميزان'),
+        ];
 
         $this->form->fill([
-            'mail'                        => $row->mail_config ?? [],
+            'mail'                        => $mailConfig,
             'otp_length'                  => PlatformSetting::get('otp.length', 6),
             'otp_ttl_minutes'             => PlatformSetting::get('otp.ttl_minutes', 15),
             'otp_max_attempts'            => PlatformSetting::get('otp.max_attempts', 5),
