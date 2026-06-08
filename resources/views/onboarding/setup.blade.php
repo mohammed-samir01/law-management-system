@@ -17,13 +17,14 @@
                 showConfirm: false,
                 get hasMin()     { return this.password.length >= 8 },
                 get hasUpper()   { return /[A-Z]/.test(this.password) },
+                get hasLower()   { return /[a-z]/.test(this.password) },
                 get hasNumber()  { return /[0-9]/.test(this.password) },
                 get hasSpecial() { return /[^A-Za-z0-9]/.test(this.password) },
                 get strength() {
-                    const s = [this.hasMin, this.hasUpper, this.hasNumber, this.hasSpecial].filter(Boolean).length;
-                    if (s <= 1) return 'weak';
-                    if (s === 2) return 'fair';
-                    if (s === 3) return 'good';
+                    const s = [this.hasMin, this.hasUpper, this.hasLower, this.hasNumber, this.hasSpecial].filter(Boolean).length;
+                    if (s <= 2) return 'weak';
+                    if (s === 3) return 'fair';
+                    if (s === 4) return 'good';
                     return 'strong';
                 },
                 get strengthLabel() {
@@ -201,6 +202,13 @@
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" x-show="!hasUpper" d="M12 12m-4 0a4 4 0 108 0"/>
                             </svg>
                             حرف كبير واحد على الأقل (A-Z)
+                        </li>
+                        <li class="flex items-center gap-2 text-xs transition-colors" :class="hasLower ? 'text-green-600' : 'text-gray-400'">
+                            <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" x-show="hasLower"  d="M5 13l4 4L19 7"/>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" x-show="!hasLower" d="M12 12m-4 0a4 4 0 108 0"/>
+                            </svg>
+                            حرف صغير واحد على الأقل (a-z)
                         </li>
                         <li class="flex items-center gap-2 text-xs transition-colors" :class="hasNumber ? 'text-green-600' : 'text-gray-400'">
                             <svg class="w-3.5 h-3.5 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
