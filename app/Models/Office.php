@@ -190,7 +190,14 @@ class Office extends Model
 
     public function activeAddons(): Collection
     {
-        return $this->addons()->wherePivot('status', 'active')->get();
+        // Cache per model instance for the lifetime of the request.
+        if (! isset($this->relations['_active_addons'])) {
+            $this->relations['_active_addons'] = $this->addons()
+                ->wherePivot('status', 'active')
+                ->get();
+        }
+
+        return $this->relations['_active_addons'];
     }
 
     public function hasAddon(string $slug): bool
