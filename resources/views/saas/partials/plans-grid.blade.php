@@ -4,20 +4,19 @@
         @php
             $isPopular  = $plan->slug === 'pro';
             $isTrial    = $plan->slug === 'trial';
-            $price      = $cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
+            $egpPrice   = $cycle === 'yearly' ? $plan->price_yearly : $plan->price_monthly;
             $nameAr     = $plan->getTranslation('name', 'ar');
             $nameEn     = $plan->getTranslation('name', 'en') ?: $nameAr;
-            $currency   = $plan->currency ?? 'EGP';
-            $currencyAr = $currency === 'EGP' ? 'ج.م' : $currency;
-            $currencyEn = $currency;
             $features   = $plan->features ?? [];
+
+            // Convert price to visitor's currency
+            $priceData  = fmt_price((float) $egpPrice);
         @endphp
         <div class="relative bg-white dark:bg-gray-900 rounded-2xl border {{ $isPopular ? 'border-gold shadow-xl ring-2 ring-gold/30' : 'border-gray-200 dark:border-gray-700 shadow-sm' }} p-7 flex flex-col">
 
             @if($isPopular)
                 <span class="absolute -top-3 end-6 bg-gold text-white text-xs font-bold px-3 py-1 rounded-full"
                       x-text="lang==='ar' ? 'الأكثر شيوعاً' : 'Most Popular'"></span>
-
             @endif
 
             {{-- Plan name --}}
@@ -33,9 +32,11 @@
                          x-text="lang==='ar' ? 'لمدة 30 يوم' : 'for 30 days'"></div>
                 @else
                     <div class="text-3xl font-extrabold text-navy dark:text-white">
-                        <span style="font-variant-numeric:normal; unicode-bidi:isolate; direction:ltr; display:inline-block;">{{ number_format($price) }}</span>
+                        <span style="font-variant-numeric:normal; unicode-bidi:isolate; direction:ltr; display:inline-block;">
+                            {{ $priceData['amount'] }}
+                        </span>
                         <span class="text-base font-medium text-gray-400"
-                              x-text="lang==='ar' ? '{{ $currencyAr }}' : '{{ $currencyEn }}'"></span>
+                              x-text="lang==='ar' ? '{{ $priceData['symbol'] }}' : '{{ $priceData['symbol_en'] }}'"></span>
                     </div>
                     <div class="text-sm text-gray-400 mt-1"
                          x-text="lang==='ar'
