@@ -53,6 +53,8 @@ return Application::configure(basePath: dirname(__DIR__))
             return '/admin';
         });
 
+        $middleware->web(\App\Http\Middleware\SetVisitorCurrency::class);
+
         $middleware->alias([
             'client.portal'      => \App\Http\Middleware\EnsureClientRole::class,
             'check.subscription' => \App\Http\Middleware\CheckSubscription::class,
