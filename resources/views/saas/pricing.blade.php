@@ -1,8 +1,6 @@
 @extends('layouts.saas')
 
-@section('title')
-    <span x-text="lang==='ar' ? 'الأسعار — ميزان' : 'Pricing — Mizan'"></span>
-@endsection
+@section('title', (app()->isLocale('ar') ? 'الأسعار' : 'Pricing') . ' — ' . (app()->isLocale('ar') ? 'ميزان' : 'Mizan'))
 
 @section('content')
 <section class="py-20 bg-gray-50 min-h-screen" x-data="{ cycle: 'monthly' }">
