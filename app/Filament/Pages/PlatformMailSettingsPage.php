@@ -38,13 +38,13 @@ class PlatformMailSettingsPage extends Page
 
         // Fall back to .env / config values when DB is empty
         $mailConfig = [
-            'host'         => $mailDb['host']         ?? config('mail.mailers.smtp.host', ''),
-            'port'         => $mailDb['port']         ?? config('mail.mailers.smtp.port', 587),
-            'username'     => $mailDb['username']     ?? config('mail.mailers.smtp.username', ''),
+            'host'         => ($mailDb['host']         ?: null) ?? config('mail.mailers.smtp.host', ''),
+            'port'         => ($mailDb['port']         ?: null) ?? config('mail.mailers.smtp.port', 587),
+            'username'     => ($mailDb['username']     ?: null) ?? config('mail.mailers.smtp.username', ''),
             'password'     => $mailDb['password']     ?? '',
-            'encryption'   => $mailDb['encryption']   ?? config('mail.mailers.smtp.encryption', 'tls'),
-            'from_address' => $mailDb['from_address'] ?? config('mail.from.address', ''),
-            'from_name'    => $mailDb['from_name']    ?? config('mail.from.name', 'ميزان'),
+            'encryption'   => ($mailDb['encryption']   ?: null) ?? config('mail.mailers.smtp.encryption', 'tls'),
+            'from_address' => ($mailDb['from_address'] ?: null) ?? config('mail.from.address', ''),
+            'from_name'    => ($mailDb['from_name']    ?: null) ?? config('mail.from.name', 'ميزان'),
         ];
 
         $this->form->fill([
